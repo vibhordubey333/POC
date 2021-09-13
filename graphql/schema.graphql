@@ -1,17 +1,15 @@
-type User{
-  id: ID!
-  username: String!
-  email: String!
-  meetups: [Meetup!]!
-}
-
-type Meetup{
-  id: ID!
+type Person {
+  id: Int!
   name: String!
-  description: String!
-  user: User!
+  pet: Pet
 }
 
-type Query{
-  meetups: [Meetup!]!
+type Pet {
+  id: Int!
+  name: String!
+}
+
+type Query {
+  person: [Person!]!
+  pet: [Pet!]!
 }
