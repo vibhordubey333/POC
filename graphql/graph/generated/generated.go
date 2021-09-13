@@ -35,6 +35,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	Mutation() MutationResolver
 	Query() QueryResolver
 }
 
@@ -42,26 +43,35 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	Person struct {
-		ID   func(childComplexity int) int
-		Name func(childComplexity int) int
-		Pet  func(childComplexity int) int
+	Meetup struct {
+		Description func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Name        func(childComplexity int) int
+		User        func(childComplexity int) int
 	}
 
-	Pet struct {
-		ID   func(childComplexity int) int
-		Name func(childComplexity int) int
+	Mutation struct {
+		CreateMeetup func(childComplexity int, input model.NewMeetup) int
 	}
 
 	Query struct {
-		Person func(childComplexity int) int
-		Pet    func(childComplexity int) int
+		Meetups func(childComplexity int) int
+	}
+
+	User struct {
+		Email    func(childComplexity int) int
+		ID       func(childComplexity int) int
+		Meetups  func(childComplexity int) int
+		Username func(childComplexity int) int
 	}
 }
 
+type MutationResolver interface {
+	CreateMeetup(ctx context.Context, input model.NewMeetup) (*model.Meetup, error)
+	User(ctx context.Context, input model.User) (*model.User, error)
+}
 type QueryResolver interface {
-	Person(ctx context.Context) ([]*model.Person, error)
-	Pet(ctx context.Context) ([]*model.Pet, error)
+	Meetups(ctx context.Context) ([]*model.Meetup, error)
 }
 
 type executableSchema struct {
@@ -79,54 +89,80 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Person.id":
-		if e.complexity.Person.ID == nil {
+	case "Meetup.description":
+		if e.complexity.Meetup.Description == nil {
 			break
 		}
 
-		return e.complexity.Person.ID(childComplexity), true
+		return e.complexity.Meetup.Description(childComplexity), true
 
-	case "Person.name":
-		if e.complexity.Person.Name == nil {
+	case "Meetup.id":
+		if e.complexity.Meetup.ID == nil {
 			break
 		}
 
-		return e.complexity.Person.Name(childComplexity), true
+		return e.complexity.Meetup.ID(childComplexity), true
 
-	case "Person.pet":
-		if e.complexity.Person.Pet == nil {
+	case "Meetup.name":
+		if e.complexity.Meetup.Name == nil {
 			break
 		}
 
-		return e.complexity.Person.Pet(childComplexity), true
+		return e.complexity.Meetup.Name(childComplexity), true
 
-	case "Pet.id":
-		if e.complexity.Pet.ID == nil {
+	case "Meetup.user":
+		if e.complexity.Meetup.User == nil {
 			break
 		}
 
-		return e.complexity.Pet.ID(childComplexity), true
+		return e.complexity.Meetup.User(childComplexity), true
 
-	case "Pet.name":
-		if e.complexity.Pet.Name == nil {
+	case "Mutation.createMeetup":
+		if e.complexity.Mutation.CreateMeetup == nil {
 			break
 		}
 
-		return e.complexity.Pet.Name(childComplexity), true
+		args, err := ec.field_Mutation_createMeetup_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
 
-	case "Query.person":
-		if e.complexity.Query.Person == nil {
+		return e.complexity.Mutation.CreateMeetup(childComplexity, args["input"].(model.NewMeetup)), true
+
+	case "Query.meetups":
+		if e.complexity.Query.Meetups == nil {
 			break
 		}
 
-		return e.complexity.Query.Person(childComplexity), true
+		return e.complexity.Query.Meetups(childComplexity), true
 
-	case "Query.pet":
-		if e.complexity.Query.Pet == nil {
+	case "User.email":
+		if e.complexity.User.Email == nil {
 			break
 		}
 
-		return e.complexity.Query.Pet(childComplexity), true
+		return e.complexity.User.Email(childComplexity), true
+
+	case "User.id":
+		if e.complexity.User.ID == nil {
+			break
+		}
+
+		return e.complexity.User.ID(childComplexity), true
+
+	case "User.meetups":
+		if e.complexity.User.Meetups == nil {
+			break
+		}
+
+		return e.complexity.User.Meetups(childComplexity), true
+
+	case "User.username":
+		if e.complexity.User.Username == nil {
+			break
+		}
+
+		return e.complexity.User.Username(childComplexity), true
 
 	}
 	return 0, false
@@ -145,6 +181,20 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			}
 			first = false
 			data := ec._Query(ctx, rc.Operation.SelectionSet)
+			var buf bytes.Buffer
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
+		}
+	case ast.Mutation:
+		return func(ctx context.Context) *graphql.Response {
+			if !first {
+				return nil
+			}
+			first = false
+			data := ec._Mutation(ctx, rc.Operation.SelectionSet)
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 
@@ -178,20 +228,32 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "graph/schema.graphqls", Input: `type Person {
-  id: Int!
-  name: String!
-  pet: Pet
+	{Name: "graph/schema.graphqls", Input: `
+type User {
+  id: ID!
+  username: String!
+  email: String!
+  meetups: [Meetup!]
 }
 
-type Pet {
-  id: Int!
+type Meetup {
+  id: ID!
   name: String!
+  description: String!
+  user: User!
+}
+
+input NewMeetup{
+  name: String!
+  description: String!
 }
 
 type Query {
-  person: [Person!]!
-  pet: [Pet!]!
+  meetups: [Meetup!]!
+}
+
+type Mutation{
+  createMeetup(input: NewMeetup!): Meetup!
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -199,6 +261,21 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_createMeetup_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.NewMeetup
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNNewMeetup2githubᚗcomᚋpocᚋgraphqlᚋgraphᚋmodelᚐNewMeetup(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -253,7 +330,7 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Person_id(ctx context.Context, field graphql.CollectedField, obj *model.Person) (ret graphql.Marshaler) {
+func (ec *executionContext) _Meetup_id(ctx context.Context, field graphql.CollectedField, obj *model.Meetup) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -261,7 +338,7 @@ func (ec *executionContext) _Person_id(ctx context.Context, field graphql.Collec
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "Person",
+		Object:     "Meetup",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -283,12 +360,12 @@ func (ec *executionContext) _Person_id(ctx context.Context, field graphql.Collec
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Person_name(ctx context.Context, field graphql.CollectedField, obj *model.Person) (ret graphql.Marshaler) {
+func (ec *executionContext) _Meetup_name(ctx context.Context, field graphql.CollectedField, obj *model.Meetup) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -296,7 +373,7 @@ func (ec *executionContext) _Person_name(ctx context.Context, field graphql.Coll
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "Person",
+		Object:     "Meetup",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -323,7 +400,7 @@ func (ec *executionContext) _Person_name(ctx context.Context, field graphql.Coll
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Person_pet(ctx context.Context, field graphql.CollectedField, obj *model.Person) (ret graphql.Marshaler) {
+func (ec *executionContext) _Meetup_description(ctx context.Context, field graphql.CollectedField, obj *model.Meetup) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -331,7 +408,7 @@ func (ec *executionContext) _Person_pet(ctx context.Context, field graphql.Colle
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "Person",
+		Object:     "Meetup",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -341,74 +418,7 @@ func (ec *executionContext) _Person_pet(ctx context.Context, field graphql.Colle
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Pet, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.Pet)
-	fc.Result = res
-	return ec.marshalOPet2ᚖgithubᚗcomᚋpocᚋgraphqlᚋgraphᚋmodelᚐPet(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Pet_id(ctx context.Context, field graphql.CollectedField, obj *model.Pet) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Pet",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Pet_name(ctx context.Context, field graphql.CollectedField, obj *model.Pet) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Pet",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
+		return obj.Description, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -425,7 +435,7 @@ func (ec *executionContext) _Pet_name(ctx context.Context, field graphql.Collect
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_person(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Meetup_user(ctx context.Context, field graphql.CollectedField, obj *model.Meetup) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -433,17 +443,17 @@ func (ec *executionContext) _Query_person(ctx context.Context, field graphql.Col
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "Query",
+		Object:     "Meetup",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Person(rctx)
+		return obj.User, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -455,12 +465,54 @@ func (ec *executionContext) _Query_person(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Person)
+	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalNPerson2ᚕᚖgithubᚗcomᚋpocᚋgraphqlᚋgraphᚋmodelᚐPersonᚄ(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋpocᚋgraphqlᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_pet(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_createMeetup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createMeetup_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateMeetup(rctx, args["input"].(model.NewMeetup))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Meetup)
+	fc.Result = res
+	return ec.marshalNMeetup2ᚖgithubᚗcomᚋpocᚋgraphqlᚋgraphᚋmodelᚐMeetup(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_meetups(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -478,7 +530,7 @@ func (ec *executionContext) _Query_pet(ctx context.Context, field graphql.Collec
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Pet(rctx)
+		return ec.resolvers.Query().Meetups(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -490,9 +542,9 @@ func (ec *executionContext) _Query_pet(ctx context.Context, field graphql.Collec
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Pet)
+	res := resTmp.([]*model.Meetup)
 	fc.Result = res
-	return ec.marshalNPet2ᚕᚖgithubᚗcomᚋpocᚋgraphqlᚋgraphᚋmodelᚐPetᚄ(ctx, field.Selections, res)
+	return ec.marshalNMeetup2ᚕᚖgithubᚗcomᚋpocᚋgraphqlᚋgraphᚋmodelᚐMeetupᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -564,6 +616,143 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	res := resTmp.(*introspection.Schema)
 	fc.Result = res
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_username(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Username, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_email(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Email, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_meetups(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Meetups, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Meetup)
+	fc.Result = res
+	return ec.marshalOMeetup2ᚕᚖgithubᚗcomᚋpocᚋgraphqlᚋgraphᚋmodelᚐMeetupᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -1688,6 +1877,37 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputNewMeetup(ctx context.Context, obj interface{}) (model.NewMeetup, error) {
+	var it model.NewMeetup
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
+			it.Description, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -1696,29 +1916,37 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** object.gotpl ****************************
 
-var personImplementors = []string{"Person"}
+var meetupImplementors = []string{"Meetup"}
 
-func (ec *executionContext) _Person(ctx context.Context, sel ast.SelectionSet, obj *model.Person) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, personImplementors)
+func (ec *executionContext) _Meetup(ctx context.Context, sel ast.SelectionSet, obj *model.Meetup) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, meetupImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("Person")
+			out.Values[i] = graphql.MarshalString("Meetup")
 		case "id":
-			out.Values[i] = ec._Person_id(ctx, field, obj)
+			out.Values[i] = ec._Meetup_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "name":
-			out.Values[i] = ec._Person_name(ctx, field, obj)
+			out.Values[i] = ec._Meetup_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "pet":
-			out.Values[i] = ec._Person_pet(ctx, field, obj)
+		case "description":
+			out.Values[i] = ec._Meetup_description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "user":
+			out.Values[i] = ec._Meetup_user(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1730,24 +1958,23 @@ func (ec *executionContext) _Person(ctx context.Context, sel ast.SelectionSet, o
 	return out
 }
 
-var petImplementors = []string{"Pet"}
+var mutationImplementors = []string{"Mutation"}
 
-func (ec *executionContext) _Pet(ctx context.Context, sel ast.SelectionSet, obj *model.Pet) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, petImplementors)
+func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, mutationImplementors)
+
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Mutation",
+	})
 
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("Pet")
-		case "id":
-			out.Values[i] = ec._Pet_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "name":
-			out.Values[i] = ec._Pet_name(ctx, field, obj)
+			out.Values[i] = graphql.MarshalString("Mutation")
+		case "createMeetup":
+			out.Values[i] = ec._Mutation_createMeetup(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -1777,7 +2004,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "person":
+		case "meetups":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -1785,21 +2012,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_person(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "pet":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_pet(ctx, field)
+				res = ec._Query_meetups(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -1809,6 +2022,45 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
 			out.Values[i] = ec._Query___schema(ctx, field)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var userImplementors = []string{"User"}
+
+func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj *model.User) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, userImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("User")
+		case "id":
+			out.Values[i] = ec._User_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "username":
+			out.Values[i] = ec._User_username(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "email":
+			out.Values[i] = ec._User_email(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "meetups":
+			out.Values[i] = ec._User_meetups(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2085,13 +2337,13 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
-	res, err := graphql.UnmarshalInt(v)
+func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
+	res, err := graphql.UnmarshalID(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
-	res := graphql.MarshalInt(v)
+func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	res := graphql.MarshalID(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -2100,7 +2352,11 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNPerson2ᚕᚖgithubᚗcomᚋpocᚋgraphqlᚋgraphᚋmodelᚐPersonᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Person) graphql.Marshaler {
+func (ec *executionContext) marshalNMeetup2githubᚗcomᚋpocᚋgraphqlᚋgraphᚋmodelᚐMeetup(ctx context.Context, sel ast.SelectionSet, v model.Meetup) graphql.Marshaler {
+	return ec._Meetup(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNMeetup2ᚕᚖgithubᚗcomᚋpocᚋgraphqlᚋgraphᚋmodelᚐMeetupᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Meetup) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -2124,7 +2380,7 @@ func (ec *executionContext) marshalNPerson2ᚕᚖgithubᚗcomᚋpocᚋgraphqlᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNPerson2ᚖgithubᚗcomᚋpocᚋgraphqlᚋgraphᚋmodelᚐPerson(ctx, sel, v[i])
+			ret[i] = ec.marshalNMeetup2ᚖgithubᚗcomᚋpocᚋgraphqlᚋgraphᚋmodelᚐMeetup(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -2144,68 +2400,19 @@ func (ec *executionContext) marshalNPerson2ᚕᚖgithubᚗcomᚋpocᚋgraphqlᚋ
 	return ret
 }
 
-func (ec *executionContext) marshalNPerson2ᚖgithubᚗcomᚋpocᚋgraphqlᚋgraphᚋmodelᚐPerson(ctx context.Context, sel ast.SelectionSet, v *model.Person) graphql.Marshaler {
+func (ec *executionContext) marshalNMeetup2ᚖgithubᚗcomᚋpocᚋgraphqlᚋgraphᚋmodelᚐMeetup(ctx context.Context, sel ast.SelectionSet, v *model.Meetup) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
 		}
 		return graphql.Null
 	}
-	return ec._Person(ctx, sel, v)
+	return ec._Meetup(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNPet2ᚕᚖgithubᚗcomᚋpocᚋgraphqlᚋgraphᚋmodelᚐPetᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Pet) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNPet2ᚖgithubᚗcomᚋpocᚋgraphqlᚋgraphᚋmodelᚐPet(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
-func (ec *executionContext) marshalNPet2ᚖgithubᚗcomᚋpocᚋgraphqlᚋgraphᚋmodelᚐPet(ctx context.Context, sel ast.SelectionSet, v *model.Pet) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._Pet(ctx, sel, v)
+func (ec *executionContext) unmarshalNNewMeetup2githubᚗcomᚋpocᚋgraphqlᚋgraphᚋmodelᚐNewMeetup(ctx context.Context, v interface{}) (model.NewMeetup, error) {
+	res, err := ec.unmarshalInputNewMeetup(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
@@ -2221,6 +2428,16 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋpocᚋgraphqlᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._User(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -2504,11 +2721,51 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return graphql.MarshalBoolean(*v)
 }
 
-func (ec *executionContext) marshalOPet2ᚖgithubᚗcomᚋpocᚋgraphqlᚋgraphᚋmodelᚐPet(ctx context.Context, sel ast.SelectionSet, v *model.Pet) graphql.Marshaler {
+func (ec *executionContext) marshalOMeetup2ᚕᚖgithubᚗcomᚋpocᚋgraphqlᚋgraphᚋmodelᚐMeetupᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Meetup) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return ec._Pet(ctx, sel, v)
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNMeetup2ᚖgithubᚗcomᚋpocᚋgraphqlᚋgraphᚋmodelᚐMeetup(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

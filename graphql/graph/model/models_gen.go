@@ -2,13 +2,22 @@
 
 package model
 
-type Person struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-	Pet  *Pet   `json:"pet"`
+type Meetup struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	User        *User  `json:"user"`
+	UserID      string `json:"userid"`
 }
 
-type Pet struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+type NewMeetup struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+type User struct {
+	ID       string    `json:"id"`
+	Username string    `json:"username"`
+	Email    string    `json:"email"`
+	Meetups  []*Meetup `json:"meetups"`
 }
