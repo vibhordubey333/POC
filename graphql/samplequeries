@@ -1,0 +1,19 @@
+# Write your query or mutation here
+# query GetMeetups {
+#   meetups {
+#     id
+#     name
+#     description
+#     user{
+#       id
+#       username
+#     }
+#   }
+# }
+
+# mutation createMeetup{
+# 	createMeetup(input:{name: "Alpha",description: "TestCreate"}){
+#     name
+#     description
+#   }
+# }

@@ -7,7 +7,6 @@ type Meetup struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	User        *User  `json:"user"`
-	UserID      string `json:"userid"`
 }
 
 type NewMeetup struct {

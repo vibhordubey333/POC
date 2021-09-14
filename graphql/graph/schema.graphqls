@@ -20,6 +20,7 @@ input NewMeetup{
 
 type Query {
   meetups: [Meetup!]!
+  user(id: ID!): User!
 }
 
 type Mutation{
