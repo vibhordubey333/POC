@@ -1,5 +1,7 @@
 package log
-import(
+
+import (
+	"fmt"
 	"io/ioutil"
 	stlog "log"
 	"net/http"
@@ -25,7 +27,9 @@ func Run(destination string){
 }
 
 func RegisterHandlers(){
+	fmt.Println("Inside RegisterHandlers")
 	http.HandleFunc("/log",func(w http.ResponseWriter,r *http.Request){
+		fmt.Println("Starting log service")
 		msgRecieved,errorResponse := ioutil.ReadAll(r.Body)
 		if errorResponse != nil || len(msgRecieved) == 0{
 			w.WriteHeader(http.StatusBadRequest)
@@ -36,5 +40,6 @@ func RegisterHandlers(){
 }
 
 func write(message string){
+	fmt.Println("Inside write")
 	log.Printf("%v\n",message)
 }
