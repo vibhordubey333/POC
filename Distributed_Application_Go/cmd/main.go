@@ -7,8 +7,8 @@ import(
 	stLog "log"
 )
 func main(){
-		log.Run("./Distributed_Application_Go.log")
-		host,port := "127.0.0.1","4000"
+		log.Run("../:Distributed_Application_Go.log")
+		host,port := "localhost","4000"
 		fmt.Println("Log service starting on host and port",host,":",port)
 		ctx,errorResponse := service.Start(context.Background(),
 			"Log Service",
