@@ -8,14 +8,16 @@ import(
 	stLog "log"
 )
 func main(){
-		log.Run("Distributed_Application_Go.log")
+		log.Run("../../Distributed_Application_Go.log")
 		//TODO: Pick these from configuration files
-		host,port := "127.0.0.1","7777"
+		host,port := "127.0.0.1","4000"
 		serviceAddress := fmt.Sprintf("http://%v:%v",host,port)
 
 		var r registry.Registration
 		r.ServiceName = registry.LogService
 		r.ServiceURL  =	serviceAddress
+		r.RequiredServices = make([]registry.ServiceName,0)
+		r.ServiceUpdateURL = r.ServiceURL + "/services"
 		fmt.Println("ServiceName: ",r.ServiceName, "ServiceURL: ",r.ServiceURL)
 		fmt.Println("Log service starting on host and port",host,":",port)
 		ctx,errorResponse := service.Start(
