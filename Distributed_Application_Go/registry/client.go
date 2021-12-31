@@ -49,6 +49,7 @@ func( suh serviceUpdateHandler) ServeHTTP(writer http.ResponseWriter,request *ht
 		writer.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	fmt.Printf("Update Recieved : %+v",p)
 	prov.Update(p)
 }
 
