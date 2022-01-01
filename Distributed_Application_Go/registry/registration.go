@@ -9,6 +9,9 @@ type Registration struct{
 const(
 	LogService = ServiceName("LogService")
 	GradeService = ServiceName("GradeService")
+	TeacherPortalService = ServiceName("TeacherPortalService")
+	TeacherPortal		= ServiceName("TeacherPortalService")
+	TemplatePath		= ""
 )
 
 type patchEntry struct{
