@@ -1,4 +1,4 @@
-module github.com/vibhordubey333/graphql-gin-postgres
+module github.com/vibhordubey333/POC/graphql-gin-postgres
 
 go 1.17
 

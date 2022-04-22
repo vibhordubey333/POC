@@ -7,14 +7,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/vibhordubey333/graphql-gin-postgres/graphql_poc/api/generated"
-	"github.com/vibhordubey333/graphql-gin-postgres/graphql_poc/api/models"
-	"graphql-gin-postgres/graphql_poc/api/models"
+	"github.com/vibhordubey333/POC/graphql-gin-postgres/graphql_poc/api/generated"
+	"github.com/vibhordubey333/POC/graphql-gin-postgres/graphql_poc/api/models"
 )
 
 func (r *mutationResolver) CreateQuestion(ctx context.Context, input models.QuestionInput) (*models.Question, error) {
 	panic(fmt.Errorf("not implemented"))
-
 }
 
 func (r *mutationResolver) CreateChoice(ctx context.Context, input *models.ChoiceInput) (*models.Choice, error) {
