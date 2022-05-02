@@ -1,0 +1,3 @@
+extend type Query{
+    Quiz(luceneFilter: String, filter: QuizFilterGroup,sort:[QuizSort],limit: Limit):Quiz!
+}

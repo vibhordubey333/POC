@@ -1,0 +1,17 @@
+"Localization tag parameters are field: <JSON field > beanField: Field name in bean"
+directive @localized(field: String!,beanField: String) on FIELD_DEFINITION
+
+directive @goModel(model: String, models: [String!]) on OBJECT
+    | INPUT_OBJECT
+    | SCALAR
+    | ENUM
+    | INTERFACE
+    | UNION
+
+
+directive @hasPrivilege(privilege:[String]!, check: PrevilegeCheck!) on FIELD | FIELD_DEFINITION
+
+enum PrevilegeCheck {
+    ALL,
+    ANY
+}

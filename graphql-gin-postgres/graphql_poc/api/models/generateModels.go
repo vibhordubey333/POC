@@ -2,6 +2,12 @@
 
 package models
 
+import (
+	"fmt"
+	"io"
+	"strconv"
+)
+
 type Choice struct {
 	ID         string    `json:"id"`
 	Question   *Question `json:"question"`
@@ -14,6 +20,11 @@ type ChoiceInput struct {
 	ChoiceText string `json:"choice_text"`
 }
 
+type Limit struct {
+	Size   int `json:"size"`
+	Offset int `json:"offset"`
+}
+
 type Question struct {
 	ID           string    `json:"id"`
 	QuestionText string    `json:"question_text"`
@@ -24,4 +35,220 @@ type Question struct {
 type QuestionInput struct {
 	QuestionText string `json:"question_text"`
 	PubDate      string `json:"pub_date"`
+}
+
+type Quiz struct {
+	Items      []*Question `json:"items"`
+	Total      *int        `json:"total"`
+	PageLimit  *int        `json:"pageLimit"`
+	PageOffSet *int        `json:"pageOffSet"`
+}
+
+type QuizFilterGroup struct {
+	FilterParam    *QuizFilterParam `json:"filterParam"`
+	Value          interface{}      `json:"value"`
+	Key            *QuizFilter      `json:"key"`
+	FieldOperation *FieldOperation  `json:"fieldOperation"`
+}
+
+type QuizSort struct {
+	Field QuizSortKey `json:"field"`
+	Order SortOrder   `json:"order"`
+}
+
+type FieldOperation string
+
+const (
+	FieldOperationID FieldOperation = "id"
+)
+
+var AllFieldOperation = []FieldOperation{
+	FieldOperationID,
+}
+
+func (e FieldOperation) IsValid() bool {
+	switch e {
+	case FieldOperationID:
+		return true
+	}
+	return false
+}
+
+func (e FieldOperation) String() string {
+	return string(e)
+}
+
+func (e *FieldOperation) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = FieldOperation(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid FieldOperation", str)
+	}
+	return nil
+}
+
+func (e FieldOperation) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type QuizFilter string
+
+const (
+	QuizFilterID QuizFilter = "id"
+)
+
+var AllQuizFilter = []QuizFilter{
+	QuizFilterID,
+}
+
+func (e QuizFilter) IsValid() bool {
+	switch e {
+	case QuizFilterID:
+		return true
+	}
+	return false
+}
+
+func (e QuizFilter) String() string {
+	return string(e)
+}
+
+func (e *QuizFilter) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = QuizFilter(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid QuizFilter", str)
+	}
+	return nil
+}
+
+func (e QuizFilter) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type QuizFilterParam string
+
+const (
+	QuizFilterParamID QuizFilterParam = "id"
+)
+
+var AllQuizFilterParam = []QuizFilterParam{
+	QuizFilterParamID,
+}
+
+func (e QuizFilterParam) IsValid() bool {
+	switch e {
+	case QuizFilterParamID:
+		return true
+	}
+	return false
+}
+
+func (e QuizFilterParam) String() string {
+	return string(e)
+}
+
+func (e *QuizFilterParam) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = QuizFilterParam(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid QuizFilterParam", str)
+	}
+	return nil
+}
+
+func (e QuizFilterParam) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type QuizSortKey string
+
+const (
+	QuizSortKeyID QuizSortKey = "id"
+)
+
+var AllQuizSortKey = []QuizSortKey{
+	QuizSortKeyID,
+}
+
+func (e QuizSortKey) IsValid() bool {
+	switch e {
+	case QuizSortKeyID:
+		return true
+	}
+	return false
+}
+
+func (e QuizSortKey) String() string {
+	return string(e)
+}
+
+func (e *QuizSortKey) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = QuizSortKey(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid QuizSortKey", str)
+	}
+	return nil
+}
+
+func (e QuizSortKey) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type SortOrder string
+
+const (
+	SortOrderDesc SortOrder = "desc"
+	SortOrderAsc  SortOrder = "asc"
+)
+
+var AllSortOrder = []SortOrder{
+	SortOrderDesc,
+	SortOrderAsc,
+}
+
+func (e SortOrder) IsValid() bool {
+	switch e {
+	case SortOrderDesc, SortOrderAsc:
+		return true
+	}
+	return false
+}
+
+func (e SortOrder) String() string {
+	return string(e)
+}
+
+func (e *SortOrder) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SortOrder(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SORT_ORDER", str)
+	}
+	return nil
+}
+
+func (e SortOrder) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

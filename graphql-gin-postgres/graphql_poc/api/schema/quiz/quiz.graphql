@@ -2,6 +2,13 @@
 #
 # https://gqlgen.com/getting-started/
 
+type Quiz{
+    items: [Question]
+    total: Int
+    pageLimit: Int
+    pageOffSet: Int
+}
+
 type Question{
     id: String!
     question_text: String!
@@ -35,3 +42,45 @@ type Mutation{
     createQuestion(input: QuestionInput!): Question!
     createChoice(input: ChoiceInput): Choice!
 }
+
+input QuizFilterGroup{
+    filterParam:QuizFilterParam
+    value:Any
+    key:QuizFilter
+    fieldOperation:FieldOperation
+}
+
+enum FieldOperation {
+    id
+}
+
+enum QuizFilter {
+    id
+}
+
+input QuizSort{
+    field: QuizSortKey!
+    order: SORT_ORDER!
+}
+
+
+
+enum QuizFilterParam{
+    id
+}
+
+enum QuizSortKey{
+    id
+}
+
+enum SORT_ORDER{
+    desc
+    asc
+}
+
+input Limit{
+    size: Int!
+    offset: Int!
+}
+
+scalar Any
