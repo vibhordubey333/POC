@@ -6,25 +6,70 @@ package resolvers
 import (
 	"context"
 	"fmt"
+	"log"
 
+	database "github.com/vibhordubey333/POC/graphql-gin-postgres/db"
 	"github.com/vibhordubey333/POC/graphql-gin-postgres/graphql_poc/api/generated"
 	"github.com/vibhordubey333/POC/graphql-gin-postgres/graphql_poc/api/models"
 )
 
 func (r *mutationResolver) CreateQuestion(ctx context.Context, input models.QuestionInput) (*models.Question, error) {
-	panic(fmt.Errorf("not implemented"))
+	db, err := database.GetDatabase()
+	if err != nil {
+		log.Println("Unable to connect to database", err)
+		return nil, err
+	}
+	defer db.Close()
+	fmt.Println("input", input.QuestionText, input.PubDate)
+	question := models.Question{}
+	question.QuestionText = input.QuestionText
+	question.PubDate = input.PubDate
+	db.Create(&question)
+	return &question, nil
 }
 
 func (r *mutationResolver) CreateChoice(ctx context.Context, input *models.ChoiceInput) (*models.Choice, error) {
-	panic(fmt.Errorf("not implemented"))
+	db, err := database.GetDatabase()
+	if err != nil {
+		log.Println("Unable to connect to database", err)
+		return nil, err
+	}
+	defer db.Close()
+	choice := models.Choice{}
+	question := models.Question{}
+	choice.QuestionID = input.QuestionID
+	choice.ChoiceText = input.ChoiceText
+	db.First(&question, choice.QuestionID)
+	choice.Question = &question
+	db.Create(&choice)
+	return &choice, nil
 }
 
-func (r *queryResolver) Questions(ctx context.Context) ([]*models.Question, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) Question(ctx context.Context) ([]*models.Question, error) {
+	db, err := database.GetDatabase()
+	if err != nil {
+		log.Println("Unable to connect to database", err)
+		return nil, err
+	}
+	defer db.Close()
+	db.Find(r.questions)
+	for _, question := range r.questions {
+		var choices []*models.Choice
+		db.Where(&models.Choice{QuestionID: question.ID}).Find(&choices)
+		question.Choices = choices
+	}
+	return r.questions, nil
 }
 
 func (r *queryResolver) Choices(ctx context.Context) ([]*models.Choice, error) {
-	panic(fmt.Errorf("not implemented"))
+	db, err := database.GetDatabase()
+	if err != nil {
+		log.Println("Unable to connect to database", err)
+		return nil, err
+	}
+	defer db.Close()
+	db.Find(&r.choices)
+	return r.choices, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

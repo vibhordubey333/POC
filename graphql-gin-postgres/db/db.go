@@ -3,6 +3,7 @@ package database
 import(
 	"fmt"
 	"github.com/jinzhu/gorm"
+	"github.com/vibhordubey333/POC/graphql-gin-postgres/graphql_poc/api/models"
 )
 
 type dbConfig struct{
@@ -16,7 +17,7 @@ type dbConfig struct{
 var config = dbConfig{
 	host:     "localhost",
 	port:     5432,
-	user:     "postgres",
+	user:     "postgres1",
 	dbname:   "test",
 	password: "root",
 }
@@ -31,5 +32,11 @@ func GetDatabase() (*gorm.DB,error){
 }
 
 func RunMigration(db *gorm.DB){
-	if !db.HasTable(&model.Ques)
+	if !db.HasTable(&models.Question{}){
+		db.CreateTable(&models.Question{})
+	}
+	if !db.HasTable(&models.Choice{}){
+		db.CreateTable(&models.Choice{})
+		db.Model(&models.Choice{}).AddForeignKey("question_id,", "questions(id)","CASCADE","CASCADE")
+	}
 }

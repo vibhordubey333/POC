@@ -2,12 +2,6 @@
 #
 # https://gqlgen.com/getting-started/
 
-type Quiz{
-    items: [Question]
-    total: Int
-    pageLimit: Int
-    pageOffSet: Int
-}
 
 type Question{
     id: String!
@@ -19,41 +13,84 @@ type Question{
 type Choice{
     id: String!
     question: Question!
-    question_id: String
-    choice_text: String!
-}
-
-type Query{
-    questions: [Question]!
-    choices: [Choice]!
-}
-
-input QuestionInput{
-    question_text: String!
-    pub_date: String!
-}
-
-input ChoiceInput{
     question_id: String!
     choice_text: String!
 }
 
-type Mutation{
+type Query {
+    question: [Question]!
+    choices: [Choice]!
+}
+
+input QuestionInput {
+    question_text: String!
+    pub_date: String!
+}
+
+input ChoiceInput {
+    question_id: String!
+    choice_text: String!
+}
+
+type Mutation {
     createQuestion(input: QuestionInput!): Question!
     createChoice(input: ChoiceInput): Choice!
 }
 
-input QuizFilterGroup{
+
+
+#type Quiz{
+#    items: [Question]
+#    total: Int
+#    pageLimit: Int
+#    pageOffSet: Int
+#}
+#
+#type Question{
+#    id: String!
+#    question_text: String!
+#    pub_date: String!
+#    choices: [Choice]
+#}
+#
+#type Choice{
+#    id: String!
+#    question: Question!
+#    question_id: String
+#    choice_text: String!
+#}
+#
+#type Query{
+#    questions: [Question]!
+#    choices: [Choice]!
+#}
+#
+#input QuestionInput{
+#    question_text: String!
+#    pub_date: String!
+#}
+#
+#input ChoiceInput{
+#    question_id: String!
+#    choice_text: String!
+#}
+#
+#type Mutation{
+#    createQuestion(input: QuestionInput!): Question!
+#    createChoice(input: ChoiceInput): Choice!
+#}
+#
+input QuestionFilterGroup{
     filterParam:QuizFilterParam
     value:Any
     key:QuizFilter
     fieldOperation:FieldOperation
 }
-
+#
 enum FieldOperation {
     id
 }
-
+#
 enum QuizFilter {
     id
 }
@@ -62,8 +99,6 @@ input QuizSort{
     field: QuizSortKey!
     order: SORT_ORDER!
 }
-
-
 
 enum QuizFilterParam{
     id

@@ -11,7 +11,7 @@ import (
 type Choice struct {
 	ID         string    `json:"id"`
 	Question   *Question `json:"question"`
-	QuestionID *string   `json:"question_id"`
+	QuestionID string    `json:"question_id"`
 	ChoiceText string    `json:"choice_text"`
 }
 
@@ -32,23 +32,16 @@ type Question struct {
 	Choices      []*Choice `json:"choices"`
 }
 
-type QuestionInput struct {
-	QuestionText string `json:"question_text"`
-	PubDate      string `json:"pub_date"`
-}
-
-type Quiz struct {
-	Items      []*Question `json:"items"`
-	Total      *int        `json:"total"`
-	PageLimit  *int        `json:"pageLimit"`
-	PageOffSet *int        `json:"pageOffSet"`
-}
-
-type QuizFilterGroup struct {
+type QuestionFilterGroup struct {
 	FilterParam    *QuizFilterParam `json:"filterParam"`
 	Value          interface{}      `json:"value"`
 	Key            *QuizFilter      `json:"key"`
 	FieldOperation *FieldOperation  `json:"fieldOperation"`
+}
+
+type QuestionInput struct {
+	QuestionText string `json:"question_text"`
+	PubDate      string `json:"pub_date"`
 }
 
 type QuizSort struct {

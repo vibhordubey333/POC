@@ -55,12 +55,12 @@ type ComplexityRoot struct {
 	Mutation struct {
 		CreateChoice   func(childComplexity int, input *models.ChoiceInput) int
 		CreateQuestion func(childComplexity int, input models.QuestionInput) int
+		Quiz           func(childComplexity int, luceneFilter *string, filter *models.QuestionFilterGroup, sort []*models.QuizSort, limit *models.Limit) int
 	}
 
 	Query struct {
 		Choices            func(childComplexity int) int
-		Questions          func(childComplexity int) int
-		Quiz               func(childComplexity int, luceneFilter *string, filter *models.QuizFilterGroup, sort []*models.QuizSort, limit *models.Limit) int
+		Question           func(childComplexity int) int
 		__resolve__service func(childComplexity int) int
 	}
 
@@ -71,13 +71,6 @@ type ComplexityRoot struct {
 		QuestionText func(childComplexity int) int
 	}
 
-	Quiz struct {
-		Items      func(childComplexity int) int
-		PageLimit  func(childComplexity int) int
-		PageOffSet func(childComplexity int) int
-		Total      func(childComplexity int) int
-	}
-
 	_Service struct {
 		SDL func(childComplexity int) int
 	}
@@ -86,11 +79,11 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	CreateQuestion(ctx context.Context, input models.QuestionInput) (*models.Question, error)
 	CreateChoice(ctx context.Context, input *models.ChoiceInput) (*models.Choice, error)
+	Quiz(ctx context.Context, luceneFilter *string, filter *models.QuestionFilterGroup, sort []*models.QuizSort, limit *models.Limit) (*models.Question, error)
 }
 type QueryResolver interface {
-	Questions(ctx context.Context) ([]*models.Question, error)
+	Question(ctx context.Context) ([]*models.Question, error)
 	Choices(ctx context.Context) ([]*models.Choice, error)
-	Quiz(ctx context.Context, luceneFilter *string, filter *models.QuizFilterGroup, sort []*models.QuizSort, limit *models.Limit) (*models.Quiz, error)
 }
 
 type executableSchema struct {
@@ -160,6 +153,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateQuestion(childComplexity, args["input"].(models.QuestionInput)), true
 
+	case "Mutation.Quiz":
+		if e.complexity.Mutation.Quiz == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_Quiz_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.Quiz(childComplexity, args["luceneFilter"].(*string), args["filter"].(*models.QuestionFilterGroup), args["sort"].([]*models.QuizSort), args["limit"].(*models.Limit)), true
+
 	case "Query.choices":
 		if e.complexity.Query.Choices == nil {
 			break
@@ -167,24 +172,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Choices(childComplexity), true
 
-	case "Query.questions":
-		if e.complexity.Query.Questions == nil {
+	case "Query.question":
+		if e.complexity.Query.Question == nil {
 			break
 		}
 
-		return e.complexity.Query.Questions(childComplexity), true
-
-	case "Query.Quiz":
-		if e.complexity.Query.Quiz == nil {
-			break
-		}
-
-		args, err := ec.field_Query_Quiz_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Quiz(childComplexity, args["luceneFilter"].(*string), args["filter"].(*models.QuizFilterGroup), args["sort"].([]*models.QuizSort), args["limit"].(*models.Limit)), true
+		return e.complexity.Query.Question(childComplexity), true
 
 	case "Query._service":
 		if e.complexity.Query.__resolve__service == nil {
@@ -221,34 +214,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Question.QuestionText(childComplexity), true
 
-	case "Quiz.items":
-		if e.complexity.Quiz.Items == nil {
-			break
-		}
-
-		return e.complexity.Quiz.Items(childComplexity), true
-
-	case "Quiz.pageLimit":
-		if e.complexity.Quiz.PageLimit == nil {
-			break
-		}
-
-		return e.complexity.Quiz.PageLimit(childComplexity), true
-
-	case "Quiz.pageOffSet":
-		if e.complexity.Quiz.PageOffSet == nil {
-			break
-		}
-
-		return e.complexity.Quiz.PageOffSet(childComplexity), true
-
-	case "Quiz.total":
-		if e.complexity.Quiz.Total == nil {
-			break
-		}
-
-		return e.complexity.Quiz.Total(childComplexity), true
-
 	case "_Service.sdl":
 		if e.complexity._Service.SDL == nil {
 			break
@@ -266,8 +231,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputChoiceInput,
 		ec.unmarshalInputLimit,
+		ec.unmarshalInputQuestionFilterGroup,
 		ec.unmarshalInputQuestionInput,
-		ec.unmarshalInputQuizFilterGroup,
 		ec.unmarshalInputQuizSort,
 	)
 	first := true
@@ -333,12 +298,6 @@ var sources = []*ast.Source{
 #
 # https://gqlgen.com/getting-started/
 
-type Quiz{
-    items: [Question]
-    total: Int
-    pageLimit: Int
-    pageOffSet: Int
-}
 
 type Question{
     id: String!
@@ -350,41 +309,84 @@ type Question{
 type Choice{
     id: String!
     question: Question!
-    question_id: String
-    choice_text: String!
-}
-
-type Query{
-    questions: [Question]!
-    choices: [Choice]!
-}
-
-input QuestionInput{
-    question_text: String!
-    pub_date: String!
-}
-
-input ChoiceInput{
     question_id: String!
     choice_text: String!
 }
 
-type Mutation{
+type Query {
+    question: [Question]!
+    choices: [Choice]!
+}
+
+input QuestionInput {
+    question_text: String!
+    pub_date: String!
+}
+
+input ChoiceInput {
+    question_id: String!
+    choice_text: String!
+}
+
+type Mutation {
     createQuestion(input: QuestionInput!): Question!
     createChoice(input: ChoiceInput): Choice!
 }
 
-input QuizFilterGroup{
+
+
+#type Quiz{
+#    items: [Question]
+#    total: Int
+#    pageLimit: Int
+#    pageOffSet: Int
+#}
+#
+#type Question{
+#    id: String!
+#    question_text: String!
+#    pub_date: String!
+#    choices: [Choice]
+#}
+#
+#type Choice{
+#    id: String!
+#    question: Question!
+#    question_id: String
+#    choice_text: String!
+#}
+#
+#type Query{
+#    questions: [Question]!
+#    choices: [Choice]!
+#}
+#
+#input QuestionInput{
+#    question_text: String!
+#    pub_date: String!
+#}
+#
+#input ChoiceInput{
+#    question_id: String!
+#    choice_text: String!
+#}
+#
+#type Mutation{
+#    createQuestion(input: QuestionInput!): Question!
+#    createChoice(input: ChoiceInput): Choice!
+#}
+#
+input QuestionFilterGroup{
     filterParam:QuizFilterParam
     value:Any
     key:QuizFilter
     fieldOperation:FieldOperation
 }
-
+#
 enum FieldOperation {
     id
 }
-
+#
 enum QuizFilter {
     id
 }
@@ -393,8 +395,6 @@ input QuizSort{
     field: QuizSortKey!
     order: SORT_ORDER!
 }
-
-
 
 enum QuizFilterParam{
     id
@@ -415,8 +415,8 @@ input Limit{
 }
 
 scalar Any`, BuiltIn: false},
-	{Name: "schema/operation/quizQuery.graphql", Input: `extend type Query{
-    Quiz(luceneFilter: String, filter: QuizFilterGroup,sort:[QuizSort],limit: Limit):Quiz!
+	{Name: "schema/operation/quizQuery.graphql", Input: `extend type Mutation{
+    Quiz(luceneFilter: String, filter: QuestionFilterGroup,sort:[QuizSort],limit: Limit):Question!
 }
 `, BuiltIn: false},
 	{Name: "federation/directives.graphql", Input: `
@@ -446,6 +446,48 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Mutation_Quiz_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["luceneFilter"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("luceneFilter"))
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["luceneFilter"] = arg0
+	var arg1 *models.QuestionFilterGroup
+	if tmp, ok := rawArgs["filter"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+		arg1, err = ec.unmarshalOQuestionFilterGroup2ᚖgithubᚗcomᚋvibhordubey333ᚋPOCᚋgraphqlᚑginᚑpostgresᚋgraphql_pocᚋapiᚋmodelsᚐQuestionFilterGroup(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filter"] = arg1
+	var arg2 []*models.QuizSort
+	if tmp, ok := rawArgs["sort"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sort"))
+		arg2, err = ec.unmarshalOQuizSort2ᚕᚖgithubᚗcomᚋvibhordubey333ᚋPOCᚋgraphqlᚑginᚑpostgresᚋgraphql_pocᚋapiᚋmodelsᚐQuizSort(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sort"] = arg2
+	var arg3 *models.Limit
+	if tmp, ok := rawArgs["limit"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
+		arg3, err = ec.unmarshalOLimit2ᚖgithubᚗcomᚋvibhordubey333ᚋPOCᚋgraphqlᚑginᚑpostgresᚋgraphql_pocᚋapiᚋmodelsᚐLimit(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["limit"] = arg3
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createChoice_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -473,48 +515,6 @@ func (ec *executionContext) field_Mutation_createQuestion_args(ctx context.Conte
 		}
 	}
 	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_Quiz_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 *string
-	if tmp, ok := rawArgs["luceneFilter"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("luceneFilter"))
-		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["luceneFilter"] = arg0
-	var arg1 *models.QuizFilterGroup
-	if tmp, ok := rawArgs["filter"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
-		arg1, err = ec.unmarshalOQuizFilterGroup2ᚖgithubᚗcomᚋvibhordubey333ᚋPOCᚋgraphqlᚑginᚑpostgresᚋgraphql_pocᚋapiᚋmodelsᚐQuizFilterGroup(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["filter"] = arg1
-	var arg2 []*models.QuizSort
-	if tmp, ok := rawArgs["sort"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sort"))
-		arg2, err = ec.unmarshalOQuizSort2ᚕᚖgithubᚗcomᚋvibhordubey333ᚋPOCᚋgraphqlᚑginᚑpostgresᚋgraphql_pocᚋapiᚋmodelsᚐQuizSort(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["sort"] = arg2
-	var arg3 *models.Limit
-	if tmp, ok := rawArgs["limit"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
-		arg3, err = ec.unmarshalOLimit2ᚖgithubᚗcomᚋvibhordubey333ᚋPOCᚋgraphqlᚑginᚑpostgresᚋgraphql_pocᚋapiᚋmodelsᚐLimit(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["limit"] = arg3
 	return args, nil
 }
 
@@ -690,11 +690,14 @@ func (ec *executionContext) _Choice_question_id(ctx context.Context, field graph
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Choice_question_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -884,8 +887,8 @@ func (ec *executionContext) fieldContext_Mutation_createChoice(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_questions(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_questions(ctx, field)
+func (ec *executionContext) _Mutation_Quiz(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_Quiz(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -898,7 +901,72 @@ func (ec *executionContext) _Query_questions(ctx context.Context, field graphql.
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Questions(rctx)
+		return ec.resolvers.Mutation().Quiz(rctx, fc.Args["luceneFilter"].(*string), fc.Args["filter"].(*models.QuestionFilterGroup), fc.Args["sort"].([]*models.QuizSort), fc.Args["limit"].(*models.Limit))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*models.Question)
+	fc.Result = res
+	return ec.marshalNQuestion2ᚖgithubᚗcomᚋvibhordubey333ᚋPOCᚋgraphqlᚑginᚑpostgresᚋgraphql_pocᚋapiᚋmodelsᚐQuestion(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_Quiz(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Question_id(ctx, field)
+			case "question_text":
+				return ec.fieldContext_Question_question_text(ctx, field)
+			case "pub_date":
+				return ec.fieldContext_Question_pub_date(ctx, field)
+			case "choices":
+				return ec.fieldContext_Question_choices(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Question", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_Quiz_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_question(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_question(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Question(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -915,7 +983,7 @@ func (ec *executionContext) _Query_questions(ctx context.Context, field graphql.
 	return ec.marshalNQuestion2ᚕᚖgithubᚗcomᚋvibhordubey333ᚋPOCᚋgraphqlᚑginᚑpostgresᚋgraphql_pocᚋapiᚋmodelsᚐQuestion(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_questions(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_question(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -988,71 +1056,6 @@ func (ec *executionContext) fieldContext_Query_choices(ctx context.Context, fiel
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Choice", field.Name)
 		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_Quiz(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_Quiz(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Quiz(rctx, fc.Args["luceneFilter"].(*string), fc.Args["filter"].(*models.QuizFilterGroup), fc.Args["sort"].([]*models.QuizSort), fc.Args["limit"].(*models.Limit))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*models.Quiz)
-	fc.Result = res
-	return ec.marshalNQuiz2ᚖgithubᚗcomᚋvibhordubey333ᚋPOCᚋgraphqlᚑginᚑpostgresᚋgraphql_pocᚋapiᚋmodelsᚐQuiz(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_Quiz(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "items":
-				return ec.fieldContext_Quiz_items(ctx, field)
-			case "total":
-				return ec.fieldContext_Quiz_total(ctx, field)
-			case "pageLimit":
-				return ec.fieldContext_Quiz_pageLimit(ctx, field)
-			case "pageOffSet":
-				return ec.fieldContext_Quiz_pageOffSet(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Quiz", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_Quiz_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return
 	}
 	return fc, nil
 }
@@ -1412,180 +1415,6 @@ func (ec *executionContext) fieldContext_Question_choices(ctx context.Context, f
 				return ec.fieldContext_Choice_choice_text(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Choice", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Quiz_items(ctx context.Context, field graphql.CollectedField, obj *models.Quiz) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Quiz_items(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Items, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*models.Question)
-	fc.Result = res
-	return ec.marshalOQuestion2ᚕᚖgithubᚗcomᚋvibhordubey333ᚋPOCᚋgraphqlᚑginᚑpostgresᚋgraphql_pocᚋapiᚋmodelsᚐQuestion(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Quiz_items(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Quiz",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Question_id(ctx, field)
-			case "question_text":
-				return ec.fieldContext_Question_question_text(ctx, field)
-			case "pub_date":
-				return ec.fieldContext_Question_pub_date(ctx, field)
-			case "choices":
-				return ec.fieldContext_Question_choices(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Question", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Quiz_total(ctx context.Context, field graphql.CollectedField, obj *models.Quiz) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Quiz_total(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Total, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*int)
-	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Quiz_total(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Quiz",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Quiz_pageLimit(ctx context.Context, field graphql.CollectedField, obj *models.Quiz) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Quiz_pageLimit(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PageLimit, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*int)
-	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Quiz_pageLimit(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Quiz",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Quiz_pageOffSet(ctx context.Context, field graphql.CollectedField, obj *models.Quiz) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Quiz_pageOffSet(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PageOffSet, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*int)
-	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Quiz_pageOffSet(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Quiz",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -3467,39 +3296,8 @@ func (ec *executionContext) unmarshalInputLimit(ctx context.Context, obj interfa
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputQuestionInput(ctx context.Context, obj interface{}) (models.QuestionInput, error) {
-	var it models.QuestionInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	for k, v := range asMap {
-		switch k {
-		case "question_text":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("question_text"))
-			it.QuestionText, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "pub_date":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pub_date"))
-			it.PubDate, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputQuizFilterGroup(ctx context.Context, obj interface{}) (models.QuizFilterGroup, error) {
-	var it models.QuizFilterGroup
+func (ec *executionContext) unmarshalInputQuestionFilterGroup(ctx context.Context, obj interface{}) (models.QuestionFilterGroup, error) {
+	var it models.QuestionFilterGroup
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -3536,6 +3334,37 @@ func (ec *executionContext) unmarshalInputQuizFilterGroup(ctx context.Context, o
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fieldOperation"))
 			it.FieldOperation, err = ec.unmarshalOFieldOperation2ᚖgithubᚗcomᚋvibhordubey333ᚋPOCᚋgraphqlᚑginᚑpostgresᚋgraphql_pocᚋapiᚋmodelsᚐFieldOperation(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputQuestionInput(ctx context.Context, obj interface{}) (models.QuestionInput, error) {
+	var it models.QuestionInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "question_text":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("question_text"))
+			it.QuestionText, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "pub_date":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pub_date"))
+			it.PubDate, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3612,6 +3441,9 @@ func (ec *executionContext) _Choice(ctx context.Context, sel ast.SelectionSet, o
 
 			out.Values[i] = ec._Choice_question_id(ctx, field, obj)
 
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "choice_text":
 
 			out.Values[i] = ec._Choice_choice_text(ctx, field, obj)
@@ -3667,6 +3499,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "Quiz":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_Quiz(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3697,7 +3538,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "questions":
+		case "question":
 			field := field
 
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -3706,7 +3547,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_questions(ctx, field)
+				res = ec._Query_question(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -3730,29 +3571,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_choices(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return rrm(innerCtx)
-			})
-		case "Quiz":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_Quiz(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -3846,43 +3664,6 @@ func (ec *executionContext) _Question(ctx context.Context, sel ast.SelectionSet,
 		case "choices":
 
 			out.Values[i] = ec._Question_choices(ctx, field, obj)
-
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var quizImplementors = []string{"Quiz"}
-
-func (ec *executionContext) _Quiz(ctx context.Context, sel ast.SelectionSet, obj *models.Quiz) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, quizImplementors)
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Quiz")
-		case "items":
-
-			out.Values[i] = ec._Quiz_items(ctx, field, obj)
-
-		case "total":
-
-			out.Values[i] = ec._Quiz_total(ctx, field, obj)
-
-		case "pageLimit":
-
-			out.Values[i] = ec._Quiz_pageLimit(ctx, field, obj)
-
-		case "pageOffSet":
-
-			out.Values[i] = ec._Quiz_pageOffSet(ctx, field, obj)
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -4377,20 +4158,6 @@ func (ec *executionContext) unmarshalNQuestionInput2githubᚗcomᚋvibhordubey33
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNQuiz2githubᚗcomᚋvibhordubey333ᚋPOCᚋgraphqlᚑginᚑpostgresᚋgraphql_pocᚋapiᚋmodelsᚐQuiz(ctx context.Context, sel ast.SelectionSet, v models.Quiz) graphql.Marshaler {
-	return ec._Quiz(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNQuiz2ᚖgithubᚗcomᚋvibhordubey333ᚋPOCᚋgraphqlᚑginᚑpostgresᚋgraphql_pocᚋapiᚋmodelsᚐQuiz(ctx context.Context, sel ast.SelectionSet, v *models.Quiz) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._Quiz(ctx, sel, v)
-}
-
 func (ec *executionContext) unmarshalNQuizSortKey2githubᚗcomᚋvibhordubey333ᚋPOCᚋgraphqlᚑginᚑpostgresᚋgraphql_pocᚋapiᚋmodelsᚐQuizSortKey(ctx context.Context, v interface{}) (models.QuizSortKey, error) {
 	var res models.QuizSortKey
 	err := res.UnmarshalGQL(v)
@@ -4812,22 +4579,6 @@ func (ec *executionContext) marshalOFieldOperation2ᚖgithubᚗcomᚋvibhordubey
 	return v
 }
 
-func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := graphql.UnmarshalInt(v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	res := graphql.MarshalInt(*v)
-	return res
-}
-
 func (ec *executionContext) unmarshalOLimit2ᚖgithubᚗcomᚋvibhordubey333ᚋPOCᚋgraphqlᚑginᚑpostgresᚋgraphql_pocᚋapiᚋmodelsᚐLimit(ctx context.Context, v interface{}) (*models.Limit, error) {
 	if v == nil {
 		return nil, nil
@@ -4836,52 +4587,19 @@ func (ec *executionContext) unmarshalOLimit2ᚖgithubᚗcomᚋvibhordubey333ᚋP
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOQuestion2ᚕᚖgithubᚗcomᚋvibhordubey333ᚋPOCᚋgraphqlᚑginᚑpostgresᚋgraphql_pocᚋapiᚋmodelsᚐQuestion(ctx context.Context, sel ast.SelectionSet, v []*models.Question) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOQuestion2ᚖgithubᚗcomᚋvibhordubey333ᚋPOCᚋgraphqlᚑginᚑpostgresᚋgraphql_pocᚋapiᚋmodelsᚐQuestion(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	return ret
-}
-
 func (ec *executionContext) marshalOQuestion2ᚖgithubᚗcomᚋvibhordubey333ᚋPOCᚋgraphqlᚑginᚑpostgresᚋgraphql_pocᚋapiᚋmodelsᚐQuestion(ctx context.Context, sel ast.SelectionSet, v *models.Question) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Question(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOQuestionFilterGroup2ᚖgithubᚗcomᚋvibhordubey333ᚋPOCᚋgraphqlᚑginᚑpostgresᚋgraphql_pocᚋapiᚋmodelsᚐQuestionFilterGroup(ctx context.Context, v interface{}) (*models.QuestionFilterGroup, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputQuestionFilterGroup(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOQuizFilter2ᚖgithubᚗcomᚋvibhordubey333ᚋPOCᚋgraphqlᚑginᚑpostgresᚋgraphql_pocᚋapiᚋmodelsᚐQuizFilter(ctx context.Context, v interface{}) (*models.QuizFilter, error) {
@@ -4898,14 +4616,6 @@ func (ec *executionContext) marshalOQuizFilter2ᚖgithubᚗcomᚋvibhordubey333�
 		return graphql.Null
 	}
 	return v
-}
-
-func (ec *executionContext) unmarshalOQuizFilterGroup2ᚖgithubᚗcomᚋvibhordubey333ᚋPOCᚋgraphqlᚑginᚑpostgresᚋgraphql_pocᚋapiᚋmodelsᚐQuizFilterGroup(ctx context.Context, v interface{}) (*models.QuizFilterGroup, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputQuizFilterGroup(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOQuizFilterParam2ᚖgithubᚗcomᚋvibhordubey333ᚋPOCᚋgraphqlᚑginᚑpostgresᚋgraphql_pocᚋapiᚋmodelsᚐQuizFilterParam(ctx context.Context, v interface{}) (*models.QuizFilterParam, error) {

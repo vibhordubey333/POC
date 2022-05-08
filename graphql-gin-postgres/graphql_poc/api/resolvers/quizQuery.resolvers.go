@@ -10,6 +10,6 @@ import (
 	"github.com/vibhordubey333/POC/graphql-gin-postgres/graphql_poc/api/models"
 )
 
-func (r *queryResolver) Quiz(ctx context.Context, luceneFilter *string, filter *models.QuizFilterGroup, sort []*models.QuizSort, limit *models.Limit) (*models.Quiz, error) {
+func (r *mutationResolver) Quiz(ctx context.Context, luceneFilter *string, filter *models.QuestionFilterGroup, sort []*models.QuizSort, limit *models.Limit) (*models.Question, error) {
 	panic(fmt.Errorf("not implemented"))
 }
