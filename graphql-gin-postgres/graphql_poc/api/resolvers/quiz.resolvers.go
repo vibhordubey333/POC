@@ -24,6 +24,7 @@ func (r *mutationResolver) CreateQuestion(ctx context.Context, input models.Ques
 	question := models.Question{}
 	question.QuestionText = input.QuestionText
 	question.PubDate = input.PubDate
+	question.ID = input.ID
 	db.Create(&question)
 	return &question, nil
 }
@@ -37,6 +38,7 @@ func (r *mutationResolver) CreateChoice(ctx context.Context, input *models.Choic
 	defer db.Close()
 	choice := models.Choice{}
 	question := models.Question{}
+
 	choice.QuestionID = input.QuestionID
 	choice.ChoiceText = input.ChoiceText
 	db.First(&question, choice.QuestionID)

@@ -1,7 +1,7 @@
 package main
 
 import (
-	//"github.com/99designs/gqlgen/graphql"
+	// github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/vibhordubey333/POC/graphql-gin-postgres/graphql_poc/api/resolvers"
@@ -32,4 +32,5 @@ func main(){
 	r.POST("/query",graphqlHandler())
 	r.GET("/",playgroundHandler())
 	r.Run(defaultPort)
+
 }

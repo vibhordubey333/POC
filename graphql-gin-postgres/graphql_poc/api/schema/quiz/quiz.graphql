@@ -23,6 +23,7 @@ type Query {
 }
 
 input QuestionInput {
+    id: String!
     question_text: String!
     pub_date: String!
 }

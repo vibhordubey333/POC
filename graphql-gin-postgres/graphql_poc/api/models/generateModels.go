@@ -40,6 +40,7 @@ type QuestionFilterGroup struct {
 }
 
 type QuestionInput struct {
+	ID           string `json:"id"`
 	QuestionText string `json:"question_text"`
 	PubDate      string `json:"pub_date"`
 }
