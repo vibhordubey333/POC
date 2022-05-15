@@ -18,6 +18,7 @@ type Choice struct {
 type ChoiceInput struct {
 	QuestionID string `json:"question_id"`
 	ChoiceText string `json:"choice_text"`
+	ChoiceID   string `json:"choice_id"`
 }
 
 type Limit struct {

@@ -41,6 +41,8 @@ func (r *mutationResolver) CreateChoice(ctx context.Context, input *models.Choic
 
 	choice.QuestionID = input.QuestionID
 	choice.ChoiceText = input.ChoiceText
+	choice.ID = input.ChoiceID
+
 	db.First(&question, choice.QuestionID)
 	choice.Question = &question
 	db.Create(&choice)
@@ -54,7 +56,7 @@ func (r *queryResolver) Question(ctx context.Context) ([]*models.Question, error
 		return nil, err
 	}
 	defer db.Close()
-	db.Find(r.questions)
+	db.Find(&r.questions)
 	for _, question := range r.questions {
 		var choices []*models.Choice
 		db.Where(&models.Choice{QuestionID: question.ID}).Find(&choices)

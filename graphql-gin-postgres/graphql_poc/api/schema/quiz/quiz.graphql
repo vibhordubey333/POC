@@ -31,6 +31,7 @@ input QuestionInput {
 input ChoiceInput {
     question_id: String!
     choice_text: String!
+    choice_id:   String!
 }
 
 type Mutation {

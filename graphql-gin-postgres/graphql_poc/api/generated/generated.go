@@ -327,6 +327,7 @@ input QuestionInput {
 input ChoiceInput {
     question_id: String!
     choice_text: String!
+    choice_id:   String!
 }
 
 type Mutation {
@@ -3257,6 +3258,14 @@ func (ec *executionContext) unmarshalInputChoiceInput(ctx context.Context, obj i
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("choice_text"))
 			it.ChoiceText, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "choice_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("choice_id"))
+			it.ChoiceID, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
