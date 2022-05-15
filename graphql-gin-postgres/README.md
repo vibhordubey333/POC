@@ -1,7 +1,21 @@
-#### APIs
+##Introduction
+
+POC to demonstrate fetching of data using `Graphql`,`Golang` and `Postgresql`.
+
+## Pre-requisite
+0. Go
+1. Postgresql
+2. Make [For windows users]
+
+## Run
+
+0. Go to path `POC/graphql-gin-postgres/graphql_poc/api`
+1. Fire `make run`
+
+## APIs
 >http://localhost:8888/query
 
-1. Mutation query to create question
+0. Mutation query to create question
 ````
 mutation {
   createQuestion(
@@ -32,7 +46,7 @@ Response
   }
 }
 ```
-2. Fetch question list:
+1. Fetch question list:
 ```
 {
   question {
@@ -69,7 +83,7 @@ Response
   }
 }
 ```
-3. Mutation to create choices.
+2. Mutation to create choices.
 ```
 mutation {
   createChoice(
@@ -115,7 +129,7 @@ Response:
   }
 }
 ```
-4. Query fetch all choices.
+3. Query fetch all choices.
 ```
 {
   choices {
@@ -139,3 +153,5 @@ Response
   }
 }
 ```
+Reference:
+> https://www.agiliq.com/blog/2020/04/graphql-api-server-using-golang-gin-framework/
