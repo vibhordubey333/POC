@@ -22,6 +22,7 @@ func main() {
 		log.Fatalf("Could not create pubsub Client: %v", err)
 	}
 	sub := viper.GetString("subscriber") // retrieve values from viper instead of pflag
+	fmt.Println("subscriber:", sub)
 	if len(sub) <= 0 {
 		sub = "PubSub-Demo-sub-2"
 	}
@@ -63,7 +64,8 @@ func create(client *pubsub.Client, name string, topic *pubsub.Topic) error {
 		AckDeadline: 20 * time.Second,
 	})
 	if err != nil {
-		log.Fatalln("Inside create:\n", err)
+		//Removed log.Fatalf as program will exit if subscriber already exists.
+		log.Println("Inside create:\n", err)
 		//return err
 	}
 	fmt.Printf("Created subscription: %v\n", sub)
