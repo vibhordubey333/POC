@@ -1,5 +1,32 @@
+# cloud.google.com/go v0.110.2
+## explicit; go 1.19
+cloud.google.com/go/internal
+cloud.google.com/go/internal/optional
+cloud.google.com/go/internal/trace
+cloud.google.com/go/internal/version
+# cloud.google.com/go/compute v1.19.3
+## explicit; go 1.19
+cloud.google.com/go/compute/internal
+# cloud.google.com/go/compute/metadata v0.2.3
+## explicit; go 1.19
+cloud.google.com/go/compute/metadata
+# cloud.google.com/go/iam v1.1.0
+## explicit; go 1.19
+cloud.google.com/go/iam
+cloud.google.com/go/iam/apiv1/iampb
+# cloud.google.com/go/profiler v0.3.1
+## explicit; go 1.19
+cloud.google.com/go/profiler
+cloud.google.com/go/profiler/internal
+# cloud.google.com/go/storage v1.30.1
+## explicit; go 1.19
+cloud.google.com/go/storage
+cloud.google.com/go/storage/internal
+cloud.google.com/go/storage/internal/apiv2
+cloud.google.com/go/storage/internal/apiv2/stubs
 # github.com/apache/beam/sdks/v2 v2.49.0
 ## explicit; go 1.19
+github.com/apache/beam/sdks/v2/go/container/tools
 github.com/apache/beam/sdks/v2/go/pkg/beam
 github.com/apache/beam/sdks/v2/go/pkg/beam/artifact
 github.com/apache/beam/sdks/v2/go/pkg/beam/core
@@ -13,10 +40,15 @@ github.com/apache/beam/sdks/v2/go/pkg/beam/core/metrics
 github.com/apache/beam/sdks/v2/go/pkg/beam/core/runtime
 github.com/apache/beam/sdks/v2/go/pkg/beam/core/runtime/coderx
 github.com/apache/beam/sdks/v2/go/pkg/beam/core/runtime/exec
+github.com/apache/beam/sdks/v2/go/pkg/beam/core/runtime/exec/optimized
 github.com/apache/beam/sdks/v2/go/pkg/beam/core/runtime/genx
 github.com/apache/beam/sdks/v2/go/pkg/beam/core/runtime/graphx
 github.com/apache/beam/sdks/v2/go/pkg/beam/core/runtime/graphx/schema
 github.com/apache/beam/sdks/v2/go/pkg/beam/core/runtime/graphx/v1
+github.com/apache/beam/sdks/v2/go/pkg/beam/core/runtime/harness
+github.com/apache/beam/sdks/v2/go/pkg/beam/core/runtime/harness/init
+github.com/apache/beam/sdks/v2/go/pkg/beam/core/runtime/harness/statecache
+github.com/apache/beam/sdks/v2/go/pkg/beam/core/runtime/metricsx
 github.com/apache/beam/sdks/v2/go/pkg/beam/core/runtime/pipelinex
 github.com/apache/beam/sdks/v2/go/pkg/beam/core/runtime/xlangx
 github.com/apache/beam/sdks/v2/go/pkg/beam/core/runtime/xlangx/expansionx
@@ -24,6 +56,7 @@ github.com/apache/beam/sdks/v2/go/pkg/beam/core/sdf
 github.com/apache/beam/sdks/v2/go/pkg/beam/core/state
 github.com/apache/beam/sdks/v2/go/pkg/beam/core/timers
 github.com/apache/beam/sdks/v2/go/pkg/beam/core/typex
+github.com/apache/beam/sdks/v2/go/pkg/beam/core/util/dot
 github.com/apache/beam/sdks/v2/go/pkg/beam/core/util/hooks
 github.com/apache/beam/sdks/v2/go/pkg/beam/core/util/ioutilx
 github.com/apache/beam/sdks/v2/go/pkg/beam/core/util/jsonx
@@ -33,6 +66,7 @@ github.com/apache/beam/sdks/v2/go/pkg/beam/core/util/symtab
 github.com/apache/beam/sdks/v2/go/pkg/beam/internal/errors
 github.com/apache/beam/sdks/v2/go/pkg/beam/io/fileio
 github.com/apache/beam/sdks/v2/go/pkg/beam/io/filesystem
+github.com/apache/beam/sdks/v2/go/pkg/beam/io/filesystem/gcs
 github.com/apache/beam/sdks/v2/go/pkg/beam/io/filesystem/local
 github.com/apache/beam/sdks/v2/go/pkg/beam/io/rtrackers/offsetrange
 github.com/apache/beam/sdks/v2/go/pkg/beam/io/textio
@@ -40,20 +74,40 @@ github.com/apache/beam/sdks/v2/go/pkg/beam/log
 github.com/apache/beam/sdks/v2/go/pkg/beam/model/fnexecution_v1
 github.com/apache/beam/sdks/v2/go/pkg/beam/model/jobmanagement_v1
 github.com/apache/beam/sdks/v2/go/pkg/beam/model/pipeline_v1
+github.com/apache/beam/sdks/v2/go/pkg/beam/options/gcpopts
 github.com/apache/beam/sdks/v2/go/pkg/beam/options/jobopts
 github.com/apache/beam/sdks/v2/go/pkg/beam/options/resource
 github.com/apache/beam/sdks/v2/go/pkg/beam/register
+github.com/apache/beam/sdks/v2/go/pkg/beam/runners
+github.com/apache/beam/sdks/v2/go/pkg/beam/runners/dataflow
+github.com/apache/beam/sdks/v2/go/pkg/beam/runners/dataflow/dataflowlib
 github.com/apache/beam/sdks/v2/go/pkg/beam/runners/direct
+github.com/apache/beam/sdks/v2/go/pkg/beam/runners/dot
+github.com/apache/beam/sdks/v2/go/pkg/beam/runners/flink
+github.com/apache/beam/sdks/v2/go/pkg/beam/runners/samza
+github.com/apache/beam/sdks/v2/go/pkg/beam/runners/spark
+github.com/apache/beam/sdks/v2/go/pkg/beam/runners/universal
+github.com/apache/beam/sdks/v2/go/pkg/beam/runners/universal/extworker
+github.com/apache/beam/sdks/v2/go/pkg/beam/runners/universal/runnerlib
 github.com/apache/beam/sdks/v2/go/pkg/beam/runners/vet
 github.com/apache/beam/sdks/v2/go/pkg/beam/transforms/periodic
 github.com/apache/beam/sdks/v2/go/pkg/beam/transforms/stats
 github.com/apache/beam/sdks/v2/go/pkg/beam/transforms/xlang
+github.com/apache/beam/sdks/v2/go/pkg/beam/util/diagnostics
 github.com/apache/beam/sdks/v2/go/pkg/beam/util/errorx
+github.com/apache/beam/sdks/v2/go/pkg/beam/util/fsx
+github.com/apache/beam/sdks/v2/go/pkg/beam/util/gcsx
 github.com/apache/beam/sdks/v2/go/pkg/beam/util/grpcx
 github.com/apache/beam/sdks/v2/go/pkg/beam/util/shimx
+github.com/apache/beam/sdks/v2/go/pkg/beam/util/syscallx
+github.com/apache/beam/sdks/v2/go/pkg/beam/x/beamx
+github.com/apache/beam/sdks/v2/go/pkg/beam/x/hooks/perf
 # github.com/dustin/go-humanize v1.0.1
 ## explicit; go 1.16
 github.com/dustin/go-humanize
+# github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da
+## explicit
+github.com/golang/groupcache/lru
 # github.com/golang/protobuf v1.5.3
 ## explicit; go 1.9
 github.com/golang/protobuf/jsonpb
@@ -61,24 +115,109 @@ github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
+github.com/golang/protobuf/ptypes/struct
 github.com/golang/protobuf/ptypes/timestamp
 github.com/golang/protobuf/ptypes/wrappers
+# github.com/google/go-cmp v0.5.9
+## explicit; go 1.13
+github.com/google/go-cmp/cmp
+github.com/google/go-cmp/cmp/internal/diff
+github.com/google/go-cmp/cmp/internal/flags
+github.com/google/go-cmp/cmp/internal/function
+github.com/google/go-cmp/cmp/internal/value
+# github.com/google/pprof v0.0.0-20221103000818-d260c55eee4c
+## explicit; go 1.18
+github.com/google/pprof/profile
+# github.com/google/s2a-go v0.1.4
+## explicit; go 1.16
+github.com/google/s2a-go
+github.com/google/s2a-go/fallback
+github.com/google/s2a-go/internal/authinfo
+github.com/google/s2a-go/internal/handshaker
+github.com/google/s2a-go/internal/handshaker/service
+github.com/google/s2a-go/internal/proto/common_go_proto
+github.com/google/s2a-go/internal/proto/s2a_context_go_proto
+github.com/google/s2a-go/internal/proto/s2a_go_proto
+github.com/google/s2a-go/internal/proto/v2/common_go_proto
+github.com/google/s2a-go/internal/proto/v2/s2a_context_go_proto
+github.com/google/s2a-go/internal/proto/v2/s2a_go_proto
+github.com/google/s2a-go/internal/record
+github.com/google/s2a-go/internal/record/internal/aeadcrypter
+github.com/google/s2a-go/internal/record/internal/halfconn
+github.com/google/s2a-go/internal/tokenmanager
+github.com/google/s2a-go/internal/v2
+github.com/google/s2a-go/internal/v2/certverifier
+github.com/google/s2a-go/internal/v2/remotesigner
+github.com/google/s2a-go/internal/v2/tlsconfigstore
+github.com/google/s2a-go/stream
 # github.com/google/uuid v1.3.0
 ## explicit
 github.com/google/uuid
+# github.com/googleapis/enterprise-certificate-proxy v0.2.5
+## explicit; go 1.19
+github.com/googleapis/enterprise-certificate-proxy/client
+github.com/googleapis/enterprise-certificate-proxy/client/util
+# github.com/googleapis/gax-go/v2 v2.11.0
+## explicit; go 1.19
+github.com/googleapis/gax-go/v2
+github.com/googleapis/gax-go/v2/apierror
+github.com/googleapis/gax-go/v2/apierror/internal/proto
+github.com/googleapis/gax-go/v2/internal
+# go.opencensus.io v0.24.0
+## explicit; go 1.13
+go.opencensus.io
+go.opencensus.io/internal
+go.opencensus.io/internal/tagencoding
+go.opencensus.io/metric/metricdata
+go.opencensus.io/metric/metricproducer
+go.opencensus.io/plugin/ocgrpc
+go.opencensus.io/plugin/ochttp
+go.opencensus.io/plugin/ochttp/propagation/b3
+go.opencensus.io/resource
+go.opencensus.io/stats
+go.opencensus.io/stats/internal
+go.opencensus.io/stats/view
+go.opencensus.io/tag
+go.opencensus.io/trace
+go.opencensus.io/trace/internal
+go.opencensus.io/trace/propagation
+go.opencensus.io/trace/tracestate
+# golang.org/x/crypto v0.10.0
+## explicit; go 1.17
+golang.org/x/crypto/chacha20
+golang.org/x/crypto/chacha20poly1305
+golang.org/x/crypto/cryptobyte
+golang.org/x/crypto/cryptobyte/asn1
+golang.org/x/crypto/hkdf
+golang.org/x/crypto/internal/alias
+golang.org/x/crypto/internal/poly1305
 # golang.org/x/exp v0.0.0-20230510235704-dd950f8aeaea
 ## explicit; go 1.20
 golang.org/x/exp/maps
 # golang.org/x/net v0.11.0
 ## explicit; go 1.17
+golang.org/x/net/context
 golang.org/x/net/http/httpguts
 golang.org/x/net/http2
 golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/internal/timeseries
 golang.org/x/net/trace
+# golang.org/x/oauth2 v0.9.0
+## explicit; go 1.17
+golang.org/x/oauth2
+golang.org/x/oauth2/authhandler
+golang.org/x/oauth2/google
+golang.org/x/oauth2/google/internal/externalaccount
+golang.org/x/oauth2/internal
+golang.org/x/oauth2/jws
+golang.org/x/oauth2/jwt
+# golang.org/x/sync v0.3.0
+## explicit; go 1.17
+golang.org/x/sync/singleflight
 # golang.org/x/sys v0.9.0
 ## explicit; go 1.17
+golang.org/x/sys/cpu
 golang.org/x/sys/unix
 # golang.org/x/text v0.10.0
 ## explicit; go 1.17
@@ -92,8 +231,57 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
+# golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2
+## explicit; go 1.17
+golang.org/x/xerrors
+golang.org/x/xerrors/internal
+# google.golang.org/api v0.129.0
+## explicit; go 1.19
+google.golang.org/api/dataflow/v1b3
+google.golang.org/api/googleapi
+google.golang.org/api/googleapi/transport
+google.golang.org/api/iamcredentials/v1
+google.golang.org/api/internal
+google.golang.org/api/internal/cert
+google.golang.org/api/internal/gensupport
+google.golang.org/api/internal/impersonate
+google.golang.org/api/internal/third_party/uritemplates
+google.golang.org/api/iterator
+google.golang.org/api/option
+google.golang.org/api/option/internaloption
+google.golang.org/api/storage/v1
+google.golang.org/api/transport
+google.golang.org/api/transport/grpc
+google.golang.org/api/transport/http
+google.golang.org/api/transport/http/internal/propagation
+# google.golang.org/appengine v1.6.7
+## explicit; go 1.11
+google.golang.org/appengine
+google.golang.org/appengine/internal
+google.golang.org/appengine/internal/app_identity
+google.golang.org/appengine/internal/base
+google.golang.org/appengine/internal/datastore
+google.golang.org/appengine/internal/log
+google.golang.org/appengine/internal/modules
+google.golang.org/appengine/internal/remote_api
+google.golang.org/appengine/internal/socket
+google.golang.org/appengine/internal/urlfetch
+google.golang.org/appengine/socket
+google.golang.org/appengine/urlfetch
+# google.golang.org/genproto v0.0.0-20230530153820-e85fd2cbaebc
+## explicit; go 1.19
+google.golang.org/genproto/googleapis/devtools/cloudprofiler/v2
+google.golang.org/genproto/googleapis/type/date
+google.golang.org/genproto/googleapis/type/expr
+google.golang.org/genproto/internal
+# google.golang.org/genproto/googleapis/api v0.0.0-20230530153820-e85fd2cbaebc
+## explicit; go 1.19
+google.golang.org/genproto/googleapis/api
+google.golang.org/genproto/googleapis/api/annotations
 # google.golang.org/genproto/googleapis/rpc v0.0.0-20230530153820-e85fd2cbaebc
 ## explicit; go 1.19
+google.golang.org/genproto/googleapis/rpc/code
+google.golang.org/genproto/googleapis/rpc/errdetails
 google.golang.org/genproto/googleapis/rpc/status
 # google.golang.org/grpc v1.56.1
 ## explicit; go 1.17
@@ -102,6 +290,8 @@ google.golang.org/grpc/attributes
 google.golang.org/grpc/backoff
 google.golang.org/grpc/balancer
 google.golang.org/grpc/balancer/base
+google.golang.org/grpc/balancer/grpclb
+google.golang.org/grpc/balancer/grpclb/grpc_lb_v1
 google.golang.org/grpc/balancer/grpclb/state
 google.golang.org/grpc/balancer/roundrobin
 google.golang.org/grpc/binarylog/grpc_binarylog_v1
@@ -109,7 +299,16 @@ google.golang.org/grpc/channelz
 google.golang.org/grpc/codes
 google.golang.org/grpc/connectivity
 google.golang.org/grpc/credentials
+google.golang.org/grpc/credentials/alts
+google.golang.org/grpc/credentials/alts/internal
+google.golang.org/grpc/credentials/alts/internal/authinfo
+google.golang.org/grpc/credentials/alts/internal/conn
+google.golang.org/grpc/credentials/alts/internal/handshaker
+google.golang.org/grpc/credentials/alts/internal/handshaker/service
+google.golang.org/grpc/credentials/alts/internal/proto/grpc_gcp
+google.golang.org/grpc/credentials/google
 google.golang.org/grpc/credentials/insecure
+google.golang.org/grpc/credentials/oauth
 google.golang.org/grpc/encoding
 google.golang.org/grpc/encoding/proto
 google.golang.org/grpc/grpclog
@@ -122,6 +321,7 @@ google.golang.org/grpc/internal/buffer
 google.golang.org/grpc/internal/channelz
 google.golang.org/grpc/internal/credentials
 google.golang.org/grpc/internal/envconfig
+google.golang.org/grpc/internal/googlecloud
 google.golang.org/grpc/internal/grpclog
 google.golang.org/grpc/internal/grpcrand
 google.golang.org/grpc/internal/grpcsync
@@ -178,6 +378,8 @@ google.golang.org/protobuf/runtime/protoimpl
 google.golang.org/protobuf/types/descriptorpb
 google.golang.org/protobuf/types/known/anypb
 google.golang.org/protobuf/types/known/durationpb
+google.golang.org/protobuf/types/known/emptypb
+google.golang.org/protobuf/types/known/fieldmaskpb
 google.golang.org/protobuf/types/known/structpb
 google.golang.org/protobuf/types/known/timestamppb
 google.golang.org/protobuf/types/known/wrapperspb
