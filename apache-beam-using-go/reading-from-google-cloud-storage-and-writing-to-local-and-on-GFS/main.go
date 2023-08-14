@@ -143,7 +143,11 @@ type extractFn struct {
 	SmallWordLength int `json:"smallWordLength"`
 }
 
-// For your DoFn type, you’ll write a method ProcessElement where you provide the actual processing logic. You don’t need to manually extract the elements from the input collection; the Beam SDKs handle    //that for you. Your ProcessElement method should accept a parameter element, which is the input element. In order to output elements, the method can also take a function parameter, which can be called to //emit elements. The parameter types must match the input and output types of your DoFn or the framework will raise an error.
+// For your DoFn type, you’ll write a method ProcessElement where you provide the actual processing logic. You don’t need to manually extract the elements from the input collection; the Beam SDKs handle
+// that for you. Your ProcessElement method should accept a parameter element, which is the input element.
+// In order to output elements, the method can also take a function parameter, which can be called to
+// emit elements. The parameter types must match the input and output types of your DoFn or the framework
+// will raise an error.
 func (f *extractFn) ProcessElement(ctx context.Context, line string, emit func(string)) {
 	lineLen.Update(ctx, int64(len(line)))
 	if len(strings.TrimSpace(line)) == 0 {

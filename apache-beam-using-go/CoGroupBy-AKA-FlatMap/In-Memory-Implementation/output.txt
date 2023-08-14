@@ -1,0 +1,4 @@
+amy; [amy@example.com]; [111-222-3333 333-444-5555]
+carl; [carl@email.com carl@example.com]; [444-555-6666]
+julia; [julia@example.com]; []
+james; []; [222-333-4444]
