@@ -14,21 +14,6 @@ import (
 	"strings"
 )
 
-// Licensed to the Apache Software Foundation (ASF) under one or more
-// contributor license agreements.  See the NOTICE file distributed with
-// this work for additional information regarding copyright ownership.
-// The ASF licenses this file to You under the Apache License, Version 2.0
-// (the "License"); you may not use this file except in compliance with
-// the License.  You may obtain a copy of the License at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 // wordcount is an example that counts words in Shakespeare and demonstrates
 // Beam best practices.
 //
@@ -39,7 +24,7 @@ import (
 //
 // For a detailed walkthrough of this example, see
 //
-//	https://beam.apache.org/get-started/wordcount-example/
+//     https://beam.apache.org/getstarted/wordcountexample/
 //
 // Basic concepts, also in the minimal_wordcount example: reading text files;
 // counting a PCollection; writing to text files.
@@ -48,43 +33,43 @@ import (
 //
 //  1. Executing a pipeline both locally and using the selected runner
 //  2. Defining your own pipeline options
-//  3. Using ParDo with static DoFns defined out-of-line
+//  3. Using ParDo with static DoFns defined outofline
 //  4. Building a composite transform
 //
 // Concept #1: You can execute this pipeline either locally or by
-// selecting another runner. These are now command-line options added by
-// the 'beamx' package and not hard-coded as they were in the minimal_wordcount
+// selecting another runner. These are now commandline options added by
+// the 'beamx' package and not hardcoded as they were in the minimal_wordcount
 // example. The 'beamx' package also registers all included runners and
 // filesystems as a convenience.
 //
 // To change the runner, specify:
 //
-//	--runner=YOUR_SELECTED_RUNNER
+//     runner=YOUR_SELECTED_RUNNER
 //
 // To execute this pipeline, specify a local output file (if using the
 // 'direct' runner) or a remote file on a supported distributed file system.
 //
-//	--output=[YOUR_LOCAL_FILE | YOUR_REMOTE_FILE]
+//     output=[YOUR_LOCAL_FILE | YOUR_REMOTE_FILE]
 //
 // The input file defaults to a public data set containing the text of King
 // Lear by William Shakespeare. You can override it and choose your own input
-// with --input.
+// with input.
 
-// beam-playground:
+// beamplayground:
 //   name: WordCount
 //   description: An example that counts words in Shakespeare's works.
 //   multifile: false
-//   pipeline_options: --output output.txt
+//   pipeline_options: output output.txt
 //   context_line: 204
 //   categories:
-//     - Combiners
-//     - Options
-//     - Quickstart
+//      Combiners
+//      Options
+//      Quickstart
 //   complexity: MEDIUM
 //   tags:
-//     - count
-//     - io
-//     - strings
+//      count
+//      io
+//      strings
 
 // Concept #2: Defining your own configuration options. Pipeline options can
 // be standard Go flags, or they can be obtained any other way. Defining and
@@ -158,6 +143,7 @@ type extractFn struct {
 	SmallWordLength int `json:"smallWordLength"`
 }
 
+// For your DoFn type, you’ll write a method ProcessElement where you provide the actual processing logic. You don’t need to manually extract the elements from the input collection; the Beam SDKs handle    //that for you. Your ProcessElement method should accept a parameter element, which is the input element. In order to output elements, the method can also take a function parameter, which can be called to //emit elements. The parameter types must match the input and output types of your DoFn or the framework will raise an error.
 func (f *extractFn) ProcessElement(ctx context.Context, line string, emit func(string)) {
 	lineLen.Update(ctx, int64(len(line)))
 	if len(strings.TrimSpace(line)) == 0 {
@@ -169,6 +155,7 @@ func (f *extractFn) ProcessElement(ctx context.Context, line string, emit func(s
 		if len(word) < f.SmallWordLength {
 			smallWords.Inc(ctx, 1)
 		}
+		//To output the elements emit is used.
 		emit(word)
 	}
 }
