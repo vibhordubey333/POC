@@ -13,7 +13,8 @@ import (
 )
 
 /*
- */
+Reference:https://beam.apache.org/documentation/programming-guide/#cogroupbykey
+*/
 var (
 	output = flag.String("output", "output.txt", "Output file (required).")
 )
