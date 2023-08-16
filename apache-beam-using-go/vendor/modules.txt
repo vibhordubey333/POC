@@ -27,6 +27,7 @@ cloud.google.com/go/storage/internal/apiv2/stubs
 # github.com/apache/beam/sdks/v2 v2.49.0
 ## explicit; go 1.19
 github.com/apache/beam/sdks/v2/go/container/tools
+github.com/apache/beam/sdks/v2/go/examples/xlang
 github.com/apache/beam/sdks/v2/go/pkg/beam
 github.com/apache/beam/sdks/v2/go/pkg/beam/artifact
 github.com/apache/beam/sdks/v2/go/pkg/beam/core
@@ -90,6 +91,8 @@ github.com/apache/beam/sdks/v2/go/pkg/beam/runners/universal
 github.com/apache/beam/sdks/v2/go/pkg/beam/runners/universal/extworker
 github.com/apache/beam/sdks/v2/go/pkg/beam/runners/universal/runnerlib
 github.com/apache/beam/sdks/v2/go/pkg/beam/runners/vet
+github.com/apache/beam/sdks/v2/go/pkg/beam/testing/passert
+github.com/apache/beam/sdks/v2/go/pkg/beam/transforms/filter
 github.com/apache/beam/sdks/v2/go/pkg/beam/transforms/periodic
 github.com/apache/beam/sdks/v2/go/pkg/beam/transforms/stats
 github.com/apache/beam/sdks/v2/go/pkg/beam/transforms/xlang
