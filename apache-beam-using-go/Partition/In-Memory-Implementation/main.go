@@ -32,7 +32,7 @@ import (
 )
 
 func main() {
-
+	beam.Init()
 	pipeline, s := beam.NewPipelineWithRoot()
 
 	// Create a PCollection with sample data
@@ -42,12 +42,16 @@ func main() {
 	// Partition the data into two partitions based on even and odd numbers
 	partitioned := beam.ParDo(s, partitionFn, input)
 
+	log.Print("Partitioned: ", partitioned.Type())
+
 	// Collect the partitions into separate slices
 	var evenPartition []int
 	var oddPartition []int
 
-	beam.ParDo(s, collectFn(&evenPartition), partitioned)
-	beam.ParDo(s, collectFn(&oddPartition), partitioned)
+	_, parDoError := beam.TryParDo(s, collectFn(&evenPartition), partitioned)
+	log.Println("Error ParDoError:", parDoError)
+
+	beam.TryParDo(s, collectFn(&oddPartition), partitioned)
 
 	// Print the partitions
 	evenStr := fmt.Sprintf("Even Partition: %v", evenPartition)
