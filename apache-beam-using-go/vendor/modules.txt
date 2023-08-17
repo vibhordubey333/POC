@@ -27,7 +27,6 @@ cloud.google.com/go/storage/internal/apiv2/stubs
 # github.com/apache/beam/sdks/v2 v2.49.0
 ## explicit; go 1.19
 github.com/apache/beam/sdks/v2/go/container/tools
-github.com/apache/beam/sdks/v2/go/examples/xlang
 github.com/apache/beam/sdks/v2/go/pkg/beam
 github.com/apache/beam/sdks/v2/go/pkg/beam/artifact
 github.com/apache/beam/sdks/v2/go/pkg/beam/core
