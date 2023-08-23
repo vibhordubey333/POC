@@ -1,7 +1,9 @@
 # cloud.google.com/go v0.110.2
 ## explicit; go 1.19
 cloud.google.com/go/internal
+cloud.google.com/go/internal/detect
 cloud.google.com/go/internal/optional
+cloud.google.com/go/internal/pubsub
 cloud.google.com/go/internal/trace
 cloud.google.com/go/internal/version
 # cloud.google.com/go/compute v1.19.3
@@ -18,6 +20,14 @@ cloud.google.com/go/iam/apiv1/iampb
 ## explicit; go 1.19
 cloud.google.com/go/profiler
 cloud.google.com/go/profiler/internal
+# cloud.google.com/go/pubsub v1.33.0
+## explicit; go 1.19
+cloud.google.com/go/pubsub
+cloud.google.com/go/pubsub/apiv1
+cloud.google.com/go/pubsub/apiv1/pubsubpb
+cloud.google.com/go/pubsub/internal
+cloud.google.com/go/pubsub/internal/distribution
+cloud.google.com/go/pubsub/internal/scheduler
 # cloud.google.com/go/storage v1.30.1
 ## explicit; go 1.19
 cloud.google.com/go/storage
@@ -68,6 +78,7 @@ github.com/apache/beam/sdks/v2/go/pkg/beam/io/fileio
 github.com/apache/beam/sdks/v2/go/pkg/beam/io/filesystem
 github.com/apache/beam/sdks/v2/go/pkg/beam/io/filesystem/gcs
 github.com/apache/beam/sdks/v2/go/pkg/beam/io/filesystem/local
+github.com/apache/beam/sdks/v2/go/pkg/beam/io/pubsubio
 github.com/apache/beam/sdks/v2/go/pkg/beam/io/rtrackers/offsetrange
 github.com/apache/beam/sdks/v2/go/pkg/beam/io/textio
 github.com/apache/beam/sdks/v2/go/pkg/beam/log
@@ -100,6 +111,7 @@ github.com/apache/beam/sdks/v2/go/pkg/beam/util/errorx
 github.com/apache/beam/sdks/v2/go/pkg/beam/util/fsx
 github.com/apache/beam/sdks/v2/go/pkg/beam/util/gcsx
 github.com/apache/beam/sdks/v2/go/pkg/beam/util/grpcx
+github.com/apache/beam/sdks/v2/go/pkg/beam/util/pubsubx
 github.com/apache/beam/sdks/v2/go/pkg/beam/util/shimx
 github.com/apache/beam/sdks/v2/go/pkg/beam/util/syscallx
 github.com/apache/beam/sdks/v2/go/pkg/beam/x/beamx
@@ -216,6 +228,8 @@ golang.org/x/oauth2/jws
 golang.org/x/oauth2/jwt
 # golang.org/x/sync v0.3.0
 ## explicit; go 1.17
+golang.org/x/sync/errgroup
+golang.org/x/sync/semaphore
 golang.org/x/sync/singleflight
 # golang.org/x/sys v0.9.0
 ## explicit; go 1.17
@@ -252,6 +266,7 @@ google.golang.org/api/iterator
 google.golang.org/api/option
 google.golang.org/api/option/internaloption
 google.golang.org/api/storage/v1
+google.golang.org/api/support/bundler
 google.golang.org/api/transport
 google.golang.org/api/transport/grpc
 google.golang.org/api/transport/http
@@ -273,6 +288,7 @@ google.golang.org/appengine/urlfetch
 # google.golang.org/genproto v0.0.0-20230530153820-e85fd2cbaebc
 ## explicit; go 1.19
 google.golang.org/genproto/googleapis/devtools/cloudprofiler/v2
+google.golang.org/genproto/googleapis/pubsub/v1
 google.golang.org/genproto/googleapis/type/date
 google.golang.org/genproto/googleapis/type/expr
 google.golang.org/genproto/internal
