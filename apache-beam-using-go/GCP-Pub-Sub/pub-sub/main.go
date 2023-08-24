@@ -34,7 +34,7 @@ func main() {
 	})
 	// Process the messages (you can add your custom processing logic here).
 	// For example, you can use beam.ParDo to apply a custom function to each message.
-
+	//TODO: Add custom implementation
 	// Write the processed messages to the output Pub/Sub topic.
 	pubsubio.Write(s, *project1, "projects/cpl-ddcs-l-sandbox-01/topics/pubsubexample", messages)
 
