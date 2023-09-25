@@ -1,4 +1,5 @@
-####
+#### Install Spark
+0. https://sparkbyexamples.com/spark/spark-installation-on-linux-ubuntu/
 
 #### Starting Server
 
