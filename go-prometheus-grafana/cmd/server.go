@@ -1,83 +1,55 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
-	"github.com/prometheus/client_golang/prometheus"
-	prometheusHttp "github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
-	"math/rand"
 	"net/http"
-	"time"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var (
-	URL = "http://localhost:8080"
+	deviceList = []Device{}
 )
 
-// Need to register the counter so prometheus can collect this metric.
-var userStatus = prometheus.NewCounterVec(
-	prometheus.CounterOpts{
-		Name: "API_Request_User_Count",
-		Help: "User Count",
-	},
-	[]string{"user", "status"},
-)
+type Device struct {
+	ID       int    `json:"id"`
+	Mac      string `json:"mac"`
+	Firmware string `json:"firmware"`
+}
 
-// Registering the counter so prometheus can collect this metric.
 func init() {
-	prometheus.MustRegister(userStatus)
-}
-
-type MyRequest struct {
-	User string
-}
-
-func producer() {
-	poolOfUsers := []string{"Alpha", "Mike", "Foxtrot"}
-	for {
-		postBodyRequest, _ := json.Marshal(MyRequest{
-			User: poolOfUsers[rand.Intn(len(poolOfUsers))],
-		})
-		requestBody := bytes.NewBuffer(postBodyRequest)
-		http.Post(URL, "application/json", requestBody)
-		time.Sleep(time.Second * 3)
+	deviceList = []Device{
+		{
+			ID:       0,
+			Mac:      "34-34-3422-2243-43",
+			Firmware: "1.0",
+		},
+		{
+			ID:       1,
+			Mac:      "34-34-3422-2243-44",
+			Firmware: "2.0",
+		},
 	}
-}
-
-func server(w http.ResponseWriter, r *http.Request) {
-	var status, user string
-
-	defer func() {
-		userStatus.WithLabelValues(user, status).Inc()
-	}()
-
-	var requestObject MyRequest
-	json.NewDecoder(r.Body).Decode(&requestObject)
-
-	if rand.Float32() > 0.8 {
-		status = "200"
-	} else {
-		status = "501"
-	}
-	user = requestObject.User
-	log.Println(user, status)
-	w.Write([]byte(status))
 }
 
 func main() {
-	go producer()
-
-	http.Handle("/metrics", prometheusHttp.Handler())
-	http.HandleFunc("/", server)
-
-	err := http.ListenAndServe(":8080", nil)
-	log.Println("Server started", err)
-	if err != nil {
-		log.Fatal("Listen & Serve: ", err)
+	http.Handle("/metrics", promhttp.Handler())
+	http.HandleFunc("/devices", GetDevices)
+	httpErrorResponse := http.ListenAndServe(":8081", nil)
+	if httpErrorResponse != nil {
+		log.Fatalln("Error while starting server:", httpErrorResponse)
 	}
-
 }
 
-//https://medium.com/@alcbotta/monitoring-you-golang-server-with-prometheus-and-grafana-97e64bb1d0e9
-//https://antonputra.com/monitoring/monitor-golang-with-prometheus/#gauge
+func GetDevices(w http.ResponseWriter, r *http.Request) {
+	//Converting go struct to json string
+	deviceJson, jsonErrorResponse := json.Marshal(deviceList)
+	if jsonErrorResponse != nil {
+		http.Error(w, jsonErrorResponse.Error(), http.StatusBadRequest)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(deviceJson)
+}
