@@ -2,14 +2,16 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
 	"net/http"
-
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"vibhordubey333/go-prometheus-grafana/prometheus/metrics"
 )
 
 var (
-	deviceList = []Device{}
+	deviceList = make([]Device, 0)
 )
 
 type Device struct {
@@ -33,9 +35,24 @@ func init() {
 	}
 }
 
+/*
+- In the main() function, create a non-global registry without any pre-registered Collectors.
+- Then create metrics using the NewMetrics function.
+- Now we can use the devices property of the metrics struct and set it to the current number of connected devices. For that, we simply set it to the number of items in the devices slice.
+- Let's also create a custom prometheus handler with the newly created register.
+- We also need to update the /metrics handler to promHandler.
+*/
 func main() {
+	registryObject := prometheus.NewRegistry()
+
+	newMetricsObject := metrics.NewMetrics(registryObject)
+	fmt.Println(len(deviceList))
+
+	newMetricsObject.Devices.Set(float64(3))
+
 	http.Handle("/metrics", promhttp.Handler())
 	http.HandleFunc("/devices", GetDevices)
+
 	httpErrorResponse := http.ListenAndServe(":8081", nil)
 	if httpErrorResponse != nil {
 		log.Fatalln("Error while starting server:", httpErrorResponse)

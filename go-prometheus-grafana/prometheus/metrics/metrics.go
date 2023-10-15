@@ -1,6 +1,8 @@
 package metrics
 
-import "github.com/prometheus/client_golang/prometheus"
+import (
+	"github.com/prometheus/client_golang/prometheus"
+)
 
 /*
 Gauge represents a single numerical value when GaugeVec is a collection that bundles a set of Gauges with the same name but different labels.
@@ -10,7 +12,8 @@ different device types, such as routers, switches, and access points, and you wa
 bunch of examples during this tutorial.
 */
 type Metrics struct {
-	devices prometheus.Gauge
+	Devices prometheus.Gauge
+	Info    *prometheus.GaugeVec
 }
 
 /*
@@ -21,16 +24,22 @@ type Metrics struct {
 		- You also need to include a metric description.
 		- Then register it with the prometheus registry and return a pointer
 */
-func (m *Metrics) NewMetrics(reg prometheus.Registerer) *Metrics {
+func NewMetrics(reg prometheus.Registerer) *Metrics {
 	metricsObject := &Metrics{
-		devices: prometheus.NewGauge(prometheus.GaugeOpts{
-			Namespace:   "POC-1",
-			Name:        "device-connected-list",
+		Devices: prometheus.NewGauge(prometheus.GaugeOpts{
+			Namespace:   "POC1",
+			Name:        "device_connected_list",
 			Help:        "List of connected devices",
 			ConstLabels: nil,
 		}),
+		Info: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Namespace: "POC1",
+			Name:      "Info",
+			Help:      "Details of environment",
+		},
+			[]string{"version"}),
 	}
-
+	reg.MustRegister(metricsObject.Devices, metricsObject.Info)
 	return metricsObject
 }
 
