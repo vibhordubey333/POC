@@ -80,3 +80,4 @@ func main() {
 }
 
 //https://medium.com/@alcbotta/monitoring-you-golang-server-with-prometheus-and-grafana-97e64bb1d0e9
+//https://antonputra.com/monitoring/monitor-golang-with-prometheus/#gauge
