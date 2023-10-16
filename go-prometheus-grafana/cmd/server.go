@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
@@ -12,6 +11,7 @@ import (
 
 var (
 	deviceList = make([]Device, 0)
+	version    string
 )
 
 type Device struct {
@@ -21,6 +21,7 @@ type Device struct {
 }
 
 func init() {
+	version = "3.0.0"
 	deviceList = []Device{
 		{
 			ID:       0,
@@ -45,12 +46,25 @@ func init() {
 func main() {
 	registryObject := prometheus.NewRegistry()
 
-	newMetricsObject := metrics.NewMetrics(registryObject)
-	fmt.Println(len(deviceList))
+	metricsObject := metrics.NewMetrics(registryObject)
+	log.Println("Starting Server...")
 
-	newMetricsObject.Devices.Set(float64(3))
+	metricsObject.Devices.Set(float64(len(deviceList)))
+	metricsObject.Info.With(prometheus.Labels{"version": version})
 
-	http.Handle("/metrics", promhttp.Handler())
+	prometheusHandler := promhttp.HandlerFor(registryObject, promhttp.HandlerOpts{})
+
+	/*
+		vibhor@vibhor-virtualbox:~$ curl localhost:8081/metrics
+		# HELP POC1_Info Details of environment
+		# TYPE POC1_Info gauge
+		POC1_Info{version="3.0.0"} 0
+		# HELP POC1_device_connected_list List of connected devices
+		# TYPE POC1_device_connected_list gauge
+		POC1_device_connected_list 2
+
+	*/
+	http.Handle("/metrics", prometheusHandler)
 	http.HandleFunc("/devices", GetDevices)
 
 	httpErrorResponse := http.ListenAndServe(":8081", nil)
