@@ -52,25 +52,57 @@ func main() {
 	metricsObject.Devices.Set(float64(len(deviceList)))
 	metricsObject.Info.With(prometheus.Labels{"version": version})
 
-	prometheusHandler := promhttp.HandlerFor(registryObject, promhttp.HandlerOpts{})
-
 	/*
-		vibhor@vibhor-virtualbox:~$ curl localhost:8081/metrics
-		# HELP POC1_Info Details of environment
-		# TYPE POC1_Info gauge
-		POC1_Info{version="3.0.0"} 0
-		# HELP POC1_device_connected_list List of connected devices
-		# TYPE POC1_device_connected_list gauge
-		POC1_device_connected_list 2
+		    ---Output-of-metrics-api---
+			vibhor@vibhor-virtualbox:~$ curl localhost:8081/metrics
+			# HELP POC1_Info Details of environment
+			# TYPE POC1_Info gauge
+			POC1_Info{version="3.0.0"} 0
+			# HELP POC1_device_connected_list List of connected devices
+			# TYPE POC1_device_connected_list gauge
+			POC1_device_connected_list 2
 
 	*/
-	http.Handle("/metrics", prometheusHandler)
-	http.HandleFunc("/devices", GetDevices)
+	/*
+		Since we don't have 3rd party routers and frameworks, We will use multiple servers using goroutines.
+			- Why two ?
+				- Serve /metrics API
+				- Serve /devices API
 
-	httpErrorResponse := http.ListenAndServe(":8081", nil)
-	if httpErrorResponse != nil {
-		log.Fatalln("Error while starting server:", httpErrorResponse)
-	}
+	*/
+	deviceMuxObject := http.NewServeMux()
+	deviceMuxObject.HandleFunc("/devices", GetDevices)
+
+	prometheusMuxObject := http.NewServeMux()
+	prometheusHandler := promhttp.HandlerFor(registryObject, promhttp.HandlerOpts{})
+	prometheusMuxObject.Handle("/metrics", prometheusHandler)
+
+	//Device
+	go func() {
+		/*
+				vibhor@vibhor-virtualbox:~/code-repositories/POC/go-prometheus-grafana (Refactor/go-prometheus-grafana *)$ curl -XGET localhost:8081/devices
+			[{"id":0,"mac":"34-34-3422-2243-43","firmware":"1.0"},{"id":1,"mac":"34-34-3422-2243-44","firmware":"2.0"}]
+		*/
+		log.Fatal(http.ListenAndServe(":8080", deviceMuxObject))
+	}()
+	//Metric
+	go func() {
+		log.Fatal(http.ListenAndServe(":8081", prometheusMuxObject))
+		/*
+			vibhor@vibhor-virtualbox:~/code-repositories/POC/go-prometheus-grafana (Refactor/go-prometheus-grafana *)$ curl localhost:8081/metrics
+			# HELP POC1_Info Details of environment
+			# TYPE POC1_Info gauge
+			POC1_Info{version="3.0.0"} 0
+			# HELP POC1_device_connected_list List of connected devices
+			# TYPE POC1_device_connected_list gauge
+			POC1_device_connected_list 2
+
+		*/
+	}()
+
+	//To indefinitely run program
+	select {}
+
 }
 
 func GetDevices(w http.ResponseWriter, r *http.Request) {
