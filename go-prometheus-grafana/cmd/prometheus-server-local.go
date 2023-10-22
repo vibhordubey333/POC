@@ -16,6 +16,7 @@ var (
 
 // Need to register the counter so prometheus can collect this metric.
 var userStatus = prometheus.NewCounterVec(
+	//** Name should be same in prometheus.yaml  as well.
 	prometheus.CounterOpts{
 		Name: "API_Request_User_Count",
 		Help: "User Count",

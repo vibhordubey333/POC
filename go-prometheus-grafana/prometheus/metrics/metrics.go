@@ -37,6 +37,7 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 			Name:      "Info",
 			Help:      "Details of environment",
 		},
+
 			[]string{"version"}),
 	}
 	reg.MustRegister(metricsObject.Devices, metricsObject.Info)

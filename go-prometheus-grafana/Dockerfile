@@ -28,4 +28,4 @@ RUN export GO111MODULE=on
 RUN go mod tidy
 RUN GO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ./cmd/server.go
 RUN chmod +x ./cmd/server
-CMD ["./cmd/efserver"]
+CMD ["./cmd/server"]
