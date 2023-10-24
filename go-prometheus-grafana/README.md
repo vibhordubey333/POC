@@ -26,7 +26,13 @@
    ![image](https://github.com/vibhordubey333/POC/assets/22407855/ff04cc80-b4af-469f-bfb4-c92b0ddbb89d)
 
 6. Connecting with Grafana. `http://localhost:3000` Cred's `admin/devops123`
+   - Click on "Add your first data source"
    ![image](https://github.com/vibhordubey333/POC/assets/22407855/1fd1f898-23d5-45b2-b9a7-bdd8e4f8b20d)
+
+   - Configure <br/>
+     If some error occurs while connecting use it as reference: https://stackoverflow.com/questions/74029504/spring-prometheus-grafana-err-reading-prometheus-post-http-localhost90 <br/>
+     ![image](https://github.com/vibhordubey333/POC/assets/22407855/d5701d0b-a0d5-4b98-8116-0d1bd2a24867)
+
 
    
 
