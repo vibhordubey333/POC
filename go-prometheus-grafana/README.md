@@ -43,7 +43,13 @@
    - Click on "Run queries"
      ![image](https://github.com/vibhordubey333/POC/assets/22407855/2c6bd1b8-5f28-4f44-8f40-913236d42865)
 
+  ---
+  
+  1. Counter:
 
+The next metric type that we're going to implement is a counter. It is a cumulative metric that represents a single monotonically increasing counter. It can only go up and be reset to zero on restart. Typically you would use it with the rate function and measure the number of requests served, tasks completed, or errors. We're going to use it to count device upgrades.
+
+Let's declare it as a CounterVec to add custom labels. We'll use a label to count upgrades of different device types. For example, the type can be a router, access point, modem, etc.
   ---
   References:
   - https://medium.com/@alcbotta/monitoring-you-golang-server-with-prometheus-and-grafana-97e64bb1d0e9
