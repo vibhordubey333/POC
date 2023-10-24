@@ -25,3 +25,8 @@
 5. Visualizing graph
    ![image](https://github.com/vibhordubey333/POC/assets/22407855/ff04cc80-b4af-469f-bfb4-c92b0ddbb89d)
 
+6. Connecting with Grafana. `http://localhost:3000` Cred's `admin/devops123`
+   ![image](https://github.com/vibhordubey333/POC/assets/22407855/1fd1f898-23d5-45b2-b9a7-bdd8e4f8b20d)
+
+   
+
