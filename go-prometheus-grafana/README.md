@@ -44,6 +44,12 @@
      ![image](https://github.com/vibhordubey333/POC/assets/22407855/2c6bd1b8-5f28-4f44-8f40-913236d42865)
 
 
+  ---
+  References:
+  - https://medium.com/@alcbotta/monitoring-you-golang-server-with-prometheus-and-grafana-97e64bb1d0e9
+  - https://antonputra.com/monitoring/monitor-golang-with-prometheus/#gauge
+
+
  
 
 
