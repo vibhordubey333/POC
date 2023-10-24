@@ -22,3 +22,6 @@
 4. Accessing `POC1_device_connected_list` metrics
    ![image](https://github.com/vibhordubey333/POC/assets/22407855/6cc8fa57-359b-4625-95c6-d2949993e40e)
 
+5. Visualizing graph
+   ![image](https://github.com/vibhordubey333/POC/assets/22407855/ff04cc80-b4af-469f-bfb4-c92b0ddbb89d)
+
