@@ -33,6 +33,19 @@
      If some error occurs while connecting use it as reference: https://stackoverflow.com/questions/74029504/spring-prometheus-grafana-err-reading-prometheus-post-http-localhost90 <br/>
      ![image](https://github.com/vibhordubey333/POC/assets/22407855/d5701d0b-a0d5-4b98-8116-0d1bd2a24867)
 
+7. Configuring our Dashboard
+   - Click on "Create your first dashboard"
+   ![image](https://github.com/vibhordubey333/POC/assets/22407855/8b7fd1eb-c092-4590-974d-594ad6a0b142)
+   -  Add new Panel
+   ![image](https://github.com/vibhordubey333/POC/assets/22407855/d0de8f77-1631-4f5d-b803-1fa5cec358f4)
+   - Select `Metric` and `Filters`
+     ![image](https://github.com/vibhordubey333/POC/assets/22407855/cad3e1f7-78d6-405c-ad85-b341725c8ccc)
+   - Click on "Run queries"
+     ![image](https://github.com/vibhordubey333/POC/assets/22407855/2c6bd1b8-5f28-4f44-8f40-913236d42865)
+
+
+ 
+
 
    
 
