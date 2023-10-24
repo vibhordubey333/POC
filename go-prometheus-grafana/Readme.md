@@ -1,7 +1,6 @@
 #### Installing Grafana
 
-1. `docker run -d --name=grafana -p 3000:3000 grafana/grafana`
-2. `docker run -d --name=prometheus -p 9090:9090 prom/prometheus`
+1. make build
 2. `docker ps`
 3. Verify by visiting `http://localhost:3000`. Default username/password `admin/admin`.
 4. Hitting Metrics API `curl localhost:8080/metrics` <br/>
@@ -21,3 +20,6 @@
   go_gc_duration_seconds_sum 0
   go_gc_duration_seconds_count 0
   ```
+5. Accessing Prometheus dashboard.<br/>
+![image](https://github.com/vibhordubey333/POC/assets/22407855/253c82ea-5192-4024-86eb-fcfbc0753dd9)
+
