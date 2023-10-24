@@ -42,6 +42,9 @@
      ![image](https://github.com/vibhordubey333/POC/assets/22407855/cad3e1f7-78d6-405c-ad85-b341725c8ccc)
    - Click on "Run queries"
      ![image](https://github.com/vibhordubey333/POC/assets/22407855/2c6bd1b8-5f28-4f44-8f40-913236d42865)
+   - Save your dashboard to a folder in this case it is saved "General"
+     ![image](https://github.com/vibhordubey333/POC/assets/22407855/2e813017-a7c8-4230-b006-3d64e0851158)
+
 
   ---
   
