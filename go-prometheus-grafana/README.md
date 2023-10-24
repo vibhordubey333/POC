@@ -16,3 +16,9 @@
   }
 ]
 ```
+3. Accessing Prometheus dashboard.<br/>
+![image](https://github.com/vibhordubey333/POC/assets/22407855/253c82ea-5192-4024-86eb-fcfbc0753dd9)
+
+4. Accessing `POC1_device_connected_list` metrics
+   ![image](https://github.com/vibhordubey333/POC/assets/22407855/6cc8fa57-359b-4625-95c6-d2949993e40e)
+
