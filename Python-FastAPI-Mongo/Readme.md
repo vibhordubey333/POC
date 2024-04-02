@@ -18,3 +18,12 @@ pip
 7. To get specific course
    `http://127.0.0.1:8000/courses/66078d3122ae5cb883b0c46c`
    To get above id, need to connect with mongo client.
+8. `http://localhost:8000/courses/66078d3122ae5cb883b0c46c/1`
+9. Rating should be between -2 to 2 to get 200 Response.`http://localhost:8000/courses/66078d3122ae5cb883b0c46c/1`
+Try from Swagger UI or fire curl request
+```
+curl -X 'POST' \
+  'http://127.0.0.1:8000/courses/66078d3122ae5cb883b0c46c/1?rating=1' \
+  -H 'accept: application/json' \
+  -d ''
+```
