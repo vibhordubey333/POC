@@ -1,6 +1,6 @@
 package com.vibhordubey333.spring.spring_boot_lessons.game;
 
-public class MarioGame {
+public class MarioGame implements GamingConsole {
     public void up(){
         System.out.println("Jump");
     }
