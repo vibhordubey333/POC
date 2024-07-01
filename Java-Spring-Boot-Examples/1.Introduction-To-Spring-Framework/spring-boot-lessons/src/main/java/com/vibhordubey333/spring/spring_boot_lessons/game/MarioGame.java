@@ -1,5 +1,8 @@
 package com.vibhordubey333.spring.spring_boot_lessons.game;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class MarioGame implements GamingConsole {
     public void up(){
         System.out.println("Jump");
