@@ -11,6 +11,7 @@ public class GameRunner {
     @Qualifier("marioGame")
     @Autowired
     private GamingConsole game;
+
     public GameRunner(@Qualifier("superContraGame") GamingConsole game) {
         this.game = game;
     }
