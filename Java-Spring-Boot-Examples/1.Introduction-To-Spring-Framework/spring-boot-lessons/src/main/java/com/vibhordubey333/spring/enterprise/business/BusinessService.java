@@ -9,8 +9,14 @@ import java.util.List;
 //Responsible for performing computation.
 @Component
 public class BusinessService {
-    @Autowired
+    // If using setDataService comment below  @Autowired and place it above setDataService.
+//    @Autowired
     private DataService dataService;
+    @Autowired
+    public void setDataService(DataService dataService) {
+        System.out.println("setDataService:");
+        this.dataService = dataService;
+    }
 
     public long calculateSum() {
         List<Integer> data = dataService.getData();

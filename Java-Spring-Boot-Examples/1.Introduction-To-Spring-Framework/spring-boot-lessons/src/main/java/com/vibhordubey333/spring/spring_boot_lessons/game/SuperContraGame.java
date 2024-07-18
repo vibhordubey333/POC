@@ -1,8 +1,10 @@
 package com.vibhordubey333.spring.spring_boot_lessons.game;
 
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 @Component
+//@Primary
 public class SuperContraGame implements GamingConsole {
     @Override
     public void up() {

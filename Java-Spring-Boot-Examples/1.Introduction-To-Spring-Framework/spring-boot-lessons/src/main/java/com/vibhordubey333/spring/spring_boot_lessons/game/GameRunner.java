@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 public class GameRunner {
     //private MarioGame game;
     //Below we're creating object of interface and games which are implementing it can be executed without making change to GameRunner class.
-    @Qualifier("marioGame")
+   // @Qualifier("marioGame")
     @Autowired
     private GamingConsole game;
 
-    public GameRunner(@Qualifier("superContraGame") GamingConsole game) {
+    public GameRunner(@Qualifier("marioGame") GamingConsole game) {
         this.game = game;
     }
 
